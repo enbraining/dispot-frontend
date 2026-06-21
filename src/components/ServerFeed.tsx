@@ -120,7 +120,7 @@ export default function ServerFeed() {
           }}
           disabled={randomLoading}
           title="랜덤 서버"
-          className="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 dark:border-zinc-700 text-gray-400 hover:text-indigo-500 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors disabled:opacity-50 flex-shrink-0"
+          className="flex items-center justify-center w-10 h-10 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/50 text-indigo-500 dark:text-indigo-400 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 transition-colors disabled:opacity-50 flex-shrink-0"
         >
           <IconDice5 size={16} stroke={1.5} className={randomLoading ? "animate-spin" : ""} />
         </button>
@@ -148,7 +148,7 @@ export default function ServerFeed() {
       </div>
 
       {/* Sort + mobile filter */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-end gap-2">
         <select
           value={sort}
           onChange={(e) => setSort(e.target.value as Sort)}
