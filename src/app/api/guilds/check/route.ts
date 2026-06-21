@@ -6,7 +6,7 @@ async function getBotGuildIds(): Promise<Set<string>> {
   if (!token) return new Set();
   const res = await fetch("https://discord.com/api/users/@me/guilds", {
     headers: { Authorization: `Bot ${token}` },
-    next: { revalidate: 60 },
+    cache: "no-store",
   });
   if (!res.ok) return new Set();
   const guilds: { id: string }[] = await res.json();
