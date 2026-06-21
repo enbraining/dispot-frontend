@@ -31,14 +31,9 @@ export default function ServerCard({ server }: { server: Server }) {
         </div>
 
         {/* Name + category */}
-        <div className="flex items-start justify-between gap-2">
-          <h2 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 leading-snug line-clamp-1">
-            {server.name}
-          </h2>
-          <span className="flex-shrink-0 text-xs px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-medium">
-            {server.category}
-          </span>
-        </div>
+        <h2 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 leading-snug line-clamp-1">
+          {server.name}
+        </h2>
 
         {/* Description */}
         <p className="text-xs text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed flex-1">

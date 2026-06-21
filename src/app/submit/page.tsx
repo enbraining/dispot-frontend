@@ -2,16 +2,21 @@
 
 import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { IconArrowLeft, IconBrandDiscord, IconChevronDown, IconX } from "@tabler/icons-react";
+import { IconArrowLeft, IconBrandDiscord, IconChevronDown, IconX, IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
 import Image from "next/image";
-import { CATEGORIES, type Category } from "@/types/category";
 
 interface DiscordGuild {
   id: string;
   name: string;
   icon: string | null;
   approximate_member_count: number;
+}
+
+function botInviteUrl() {
+  const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
+  if (!clientId) return "https://discord.com/developers/applications";
+  return `https://discord.com/api/oauth2/authorize?client_id=${clientId}&permissions=8&scope=bot`;
 }
 
 function SubmitForm() {
@@ -21,12 +26,12 @@ function SubmitForm() {
   const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
   const [guildPickerOpen, setGuildPickerOpen] = useState(false);
   const [selectedGuild, setSelectedGuild] = useState<DiscordGuild | null>(null);
+  const pickerRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState({
     name: "",
     description: "",
     invite_url: "",
-    category: "" as Category | "",
     tags: [] as string[],
     member_count: "",
     nsfw: false,
@@ -46,9 +51,20 @@ function SubmitForm() {
       const data: DiscordGuild[] = JSON.parse(atob(encoded.replace(/-/g, "+").replace(/_/g, "/")));
       setGuilds(data);
       if (data.length === 1) applyGuild(data[0]);
-      else setGuildPickerOpen(true);
     } catch {}
   }, []);
+
+  // 피커 외부 클릭 시 닫기
+  useEffect(() => {
+    if (!guildPickerOpen) return;
+    function onClick(e: MouseEvent) {
+      if (pickerRef.current && !pickerRef.current.contains(e.target as Node)) {
+        setGuildPickerOpen(false);
+      }
+    }
+    document.addEventListener("mousedown", onClick);
+    return () => document.removeEventListener("mousedown", onClick);
+  }, [guildPickerOpen]);
 
   function applyGuild(guild: DiscordGuild) {
     setSelectedGuild(guild);
@@ -66,7 +82,6 @@ function SubmitForm() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!form.category) { setError("카테고리를 선택해주세요."); return; }
     setLoading(true);
     setError("");
     try {
@@ -105,83 +120,95 @@ function SubmitForm() {
         <p className="text-sm text-gray-500 dark:text-zinc-400">디스코드 서버를 DISCHAN에 등록하세요.</p>
       </div>
 
-      {/* Discord OAuth 버튼 */}
-      <div className="flex flex-col gap-3">
-        <a
-          href="/api/auth/discord"
-          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#5865F2] hover:bg-[#4752c4] text-white text-sm font-semibold transition-colors"
-        >
-          <IconBrandDiscord size={18} stroke={1.5} />
-          Discord로 서버 정보 불러오기
-        </a>
+      {/* 서버 선택 */}
+      <div className="flex flex-col gap-2">
+        <p className={labelClass}>서버 선택</p>
 
-        {/* 길드 선택 피커 */}
-        {guilds.length > 1 && (
-          <div className="relative">
+        {guilds.length === 0 ? (
+          /* 아직 연동 안 됨 */
+          <a
+            href="/api/auth/discord"
+            className="flex items-center justify-center gap-2 w-full py-3 rounded-xl border-2 border-dashed border-gray-200 dark:border-zinc-700 text-sm text-gray-500 dark:text-zinc-400 hover:border-indigo-400 hover:text-indigo-600 dark:hover:border-indigo-600 dark:hover:text-indigo-400 transition-colors"
+          >
+            <IconBrandDiscord size={16} stroke={1.5} />
+            Discord 연동하여 서버 선택
+          </a>
+        ) : (
+          /* 길드 셀렉터 */
+          <div ref={pickerRef} className="relative">
             <button
               type="button"
               onClick={() => setGuildPickerOpen((v) => !v)}
-              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30 text-sm text-gray-900 dark:text-white"
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-sm text-gray-900 dark:text-white hover:border-indigo-400 dark:hover:border-indigo-600 transition-colors"
             >
               {selectedGuild ? (
                 <>
                   {selectedGuild.icon ? (
                     <Image src={selectedGuild.icon} alt={selectedGuild.name} width={24} height={24} className="rounded-full flex-shrink-0" />
                   ) : (
-                    <span className="w-6 h-6 rounded-full bg-indigo-200 dark:bg-indigo-800 flex items-center justify-center text-xs font-bold flex-shrink-0">{selectedGuild.name[0]}</span>
+                    <span className="w-6 h-6 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-xs font-bold text-indigo-500 flex-shrink-0">{selectedGuild.name[0]}</span>
                   )}
-                  <span className="flex-1 text-left font-medium">{selectedGuild.name}</span>
+                  <span className="flex-1 text-left font-medium truncate">{selectedGuild.name}</span>
+                  <span className="text-xs text-gray-400 flex-shrink-0">{selectedGuild.approximate_member_count.toLocaleString()}명</span>
                 </>
               ) : (
-                <span className="flex-1 text-left text-gray-400">서버 선택...</span>
+                <span className="flex-1 text-left text-gray-400">서버를 선택하세요</span>
               )}
-              <IconChevronDown size={14} stroke={1.5} className={`flex-shrink-0 transition-transform ${guildPickerOpen ? "rotate-180" : ""}`} />
+              <IconChevronDown size={14} stroke={1.5} className={`flex-shrink-0 text-gray-400 transition-transform ${guildPickerOpen ? "rotate-180" : ""}`} />
             </button>
 
             {guildPickerOpen && (
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-20 max-h-60 overflow-y-auto">
-                {guilds.map((g) => (
-                  <button
-                    key={g.id}
-                    type="button"
-                    onClick={() => applyGuild(g)}
-                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-20">
+                <div className="max-h-56 overflow-y-auto">
+                  {guilds.map((g) => (
+                    <button
+                      key={g.id}
+                      type="button"
+                      onClick={() => applyGuild(g)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left ${selectedGuild?.id === g.id ? "bg-indigo-50 dark:bg-indigo-950/30" : ""}`}
+                    >
+                      {g.icon ? (
+                        <Image src={g.icon} alt={g.name} width={28} height={28} className="rounded-full flex-shrink-0" />
+                      ) : (
+                        <span className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-sm font-bold text-indigo-500 flex-shrink-0">{g.name[0]}</span>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{g.name}</p>
+                        <p className="text-xs text-gray-400">{g.approximate_member_count.toLocaleString()}명</p>
+                      </div>
+                      {selectedGuild?.id === g.id && <span className="w-1.5 h-1.5 rounded-full bg-indigo-500 flex-shrink-0" />}
+                    </button>
+                  ))}
+                </div>
+                {/* 봇 추가 링크 */}
+                <div className="border-t border-gray-100 dark:border-zinc-800 px-4 py-2.5">
+                  <a
+                    href={botInviteUrl()}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-indigo-500 transition-colors"
                   >
-                    {g.icon ? (
-                      <Image src={g.icon} alt={g.name} width={28} height={28} className="rounded-full flex-shrink-0" />
-                    ) : (
-                      <span className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-sm font-bold text-indigo-500 flex-shrink-0">{g.name[0]}</span>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{g.name}</p>
-                      <p className="text-xs text-gray-400">{g.approximate_member_count.toLocaleString()}명</p>
-                    </div>
-                  </button>
-                ))}
+                    <IconExternalLink size={12} stroke={1.5} />
+                    목록에 서버가 보이지 않는다면? 봇 추가하기
+                  </a>
+                </div>
               </div>
             )}
           </div>
         )}
 
-        {selectedGuild && guilds.length === 1 && (
-          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30">
-            {selectedGuild.icon ? (
-              <Image src={selectedGuild.icon} alt={selectedGuild.name} width={28} height={28} className="rounded-full flex-shrink-0" />
-            ) : (
-              <span className="w-7 h-7 rounded-full bg-indigo-200 dark:bg-indigo-800 flex items-center justify-center text-sm font-bold flex-shrink-0">{selectedGuild.name[0]}</span>
-            )}
-            <div>
-              <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedGuild.name}</p>
-              <p className="text-xs text-gray-400">{selectedGuild.approximate_member_count.toLocaleString()}명 · 정보 자동 입력됨</p>
-            </div>
-          </div>
+        {/* 연동 후에도 봇 추가 링크 노출 */}
+        {guilds.length === 0 && (
+          <a
+            href={botInviteUrl()}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="flex items-center gap-1 text-xs text-gray-400 hover:text-indigo-500 transition-colors w-fit"
+          >
+            <IconExternalLink size={11} stroke={1.5} />
+            목록에 서버가 보이지 않는다면? 봇 추가하기
+          </a>
         )}
-
-        <div className="flex items-center gap-3">
-          <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
-          <span className="text-xs text-gray-400">또는 직접 입력</span>
-          <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
-        </div>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-6 flex flex-col gap-5">
@@ -198,14 +225,6 @@ function SubmitForm() {
         <div className="flex flex-col gap-1.5">
           <label className={labelClass}>초대 링크 *</label>
           <input value={form.invite_url} onChange={(e) => set("invite_url", e.target.value)} required placeholder="https://discord.gg/..." type="url" className={inputClass} />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>카테고리 *</label>
-          <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inputClass}>
-            <option value="">카테고리 선택</option>
-            {CATEGORIES.map((c: Category) => <option key={c} value={c}>{c}</option>)}
-          </select>
         </div>
 
         <div className="flex flex-col gap-1.5">

@@ -4,9 +4,9 @@ import { createClient } from "@/lib/supabase-server";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { name, description, invite_url, category, tags, member_count, nsfw } = body;
+    const { name, description, invite_url, icon_url, tags, member_count, nsfw } = body;
 
-    if (!name || !description || !invite_url || !category) {
+    if (!name || !description || !invite_url) {
       return NextResponse.json({ error: "필수 항목을 입력해주세요." }, { status: 400 });
     }
 
@@ -15,7 +15,7 @@ export async function POST(req: NextRequest) {
       name,
       description,
       invite_url,
-      category,
+      icon_url: icon_url ?? null,
       tags: tags ?? [],
       member_count: member_count ?? 0,
       nsfw: nsfw ?? false,

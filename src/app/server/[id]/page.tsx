@@ -36,12 +36,7 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
           </div>
 
           <div className="flex items-start justify-between gap-4 flex-wrap">
-            <div className="flex flex-col gap-1">
-              <h1 className="text-xl font-bold text-gray-900 dark:text-white">{server.name}</h1>
-              <span className="text-xs px-2 py-0.5 rounded-full bg-indigo-50 dark:bg-indigo-950 text-indigo-600 dark:text-indigo-300 font-medium w-fit">
-                {server.category}
-              </span>
-            </div>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white">{server.name}</h1>
             <div className="flex gap-2">
               <BumpButton serverId={server.id} bumpCount={server.bump_count} />
               <a

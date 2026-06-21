@@ -4,7 +4,6 @@ create table servers (
   description text not null,
   invite_url text not null,
   icon_url text,
-  category text not null,
   tags text[] not null default '{}',
   member_count integer not null default 0,
   bump_count integer not null default 0,
@@ -17,7 +16,6 @@ create table servers (
 create index on servers (bumped_at desc);
 create index on servers (member_count desc);
 create index on servers (created_at desc);
-create index on servers (category);
 
 -- Bump function
 create or replace function bump_server(server_id uuid)

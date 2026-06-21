@@ -5,7 +5,6 @@ import { IconSearch, IconFilter, IconX } from "@tabler/icons-react";
 import ServerCard from "./ServerCard";
 import ServerCardSkeleton from "./ServerCardSkeleton";
 import type { Server } from "@/lib/db";
-import { CATEGORIES } from "@/types/category";
 
 const SORT_OPTIONS = [
   { value: "bump", label: "최근 범프" },
@@ -25,12 +24,10 @@ export default function ServerFeed() {
   const [hasMore, setHasMore] = useState(true);
 
   const [search, setSearch] = useState("");
-  const [category, setCategory] = useState("all");
   const [tag, setTag] = useState<string | null>(null);
   const [sort, setSort] = useState<Sort>("bump");
 
   const [filterOpen, setFilterOpen] = useState(false);
-  const [pendingCategory, setPendingCategory] = useState("all");
   const [pendingTag, setPendingTag] = useState<string | null>(null);
 
   const [tags, setTags] = useState<TagCount[]>([]);
@@ -45,11 +42,10 @@ export default function ServerFeed() {
   }, []);
 
   const fetchServers = useCallback(async (opts: {
-    search: string; category: string; tag: string | null; sort: Sort; page: number; replace?: boolean;
+    search: string; tag: string | null; sort: Sort; page: number; replace?: boolean;
   }) => {
     const params = new URLSearchParams({
       search: opts.search,
-      category: opts.category,
       sort: opts.sort,
       page: String(opts.page),
     });
@@ -65,14 +61,14 @@ export default function ServerFeed() {
   useEffect(() => {
     setLoading(true);
     setPage(0);
-    fetchServers({ search, category, tag, sort, page: 0, replace: true })
+    fetchServers({ search, tag, sort, page: 0, replace: true })
       .finally(() => setLoading(false));
-  }, [search, category, tag, sort]);
+  }, [search, tag, sort]);
 
   useEffect(() => {
     if (page === 0) return;
     setLoadingMore(true);
-    fetchServers({ search, category, tag, sort, page }).finally(() => setLoadingMore(false));
+    fetchServers({ search, tag, sort, page }).finally(() => setLoadingMore(false));
   }, [page]);
 
   useEffect(() => {
@@ -87,7 +83,6 @@ export default function ServerFeed() {
 
   useEffect(() => {
     if (filterOpen) {
-      setPendingCategory(category);
       setPendingTag(tag);
       document.body.style.overflow = "hidden";
     } else {
@@ -96,7 +91,7 @@ export default function ServerFeed() {
     return () => { document.body.style.overflow = ""; };
   }, [filterOpen]);
 
-  const hasFilter = category !== "all" || tag !== null;
+  const hasFilter = tag !== null;
 
   return (
     <div className="flex flex-col gap-5">
@@ -123,24 +118,8 @@ export default function ServerFeed() {
         </select>
       </div>
 
-      {/* Desktop: 카테고리 + 태그 */}
+      {/* Desktop: 태그 */}
       <div className="hidden sm:flex flex-col gap-3">
-        <div className="flex flex-wrap gap-2">
-          {["all", ...CATEGORIES].map((cat) => (
-            <button
-              key={cat}
-              onClick={() => setCategory(cat)}
-              className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                category === cat
-                  ? "bg-indigo-600 border-indigo-600 text-white"
-                  : "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-indigo-300 hover:text-indigo-600"
-              }`}
-            >
-              {cat === "all" ? "전체" : cat}
-            </button>
-          ))}
-        </div>
-
         {tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {tags.map(({ tag: t, count }) => (
@@ -188,25 +167,6 @@ export default function ServerFeed() {
               </button>
             </div>
 
-            <div className="flex flex-col gap-2">
-              <p className="text-xs font-medium text-gray-500 dark:text-zinc-400">카테고리</p>
-              <div className="flex flex-wrap gap-2">
-                {["all", ...CATEGORIES].map((cat) => (
-                  <button
-                    key={cat}
-                    onClick={() => setPendingCategory(cat)}
-                    className={`px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
-                      pendingCategory === cat
-                        ? "bg-indigo-600 border-indigo-600 text-white"
-                        : "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400"
-                    }`}
-                  >
-                    {cat === "all" ? "전체" : cat}
-                  </button>
-                ))}
-              </div>
-            </div>
-
             {tags.length > 0 && (
               <div className="flex flex-col gap-2">
                 <p className="text-xs font-medium text-gray-500 dark:text-zinc-400">태그</p>
@@ -229,7 +189,7 @@ export default function ServerFeed() {
             )}
 
             <button
-              onClick={() => { setCategory(pendingCategory); setTag(pendingTag); setFilterOpen(false); }}
+              onClick={() => { setTag(pendingTag); setFilterOpen(false); }}
               className="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold flex-shrink-0"
             >
               적용

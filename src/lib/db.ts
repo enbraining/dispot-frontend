@@ -1,6 +1,5 @@
 "use server";
 
-import { Category } from "@/types/category";
 import { createClient } from "./supabase-server";
 
 export interface Server {
@@ -9,7 +8,6 @@ export interface Server {
   description: string;
   invite_url: string;
   icon_url: string | null;
-  category: Category;
   tags: string[];
   member_count: number;
   bump_count: number;
@@ -20,14 +18,12 @@ export interface Server {
 }
 
 export async function getServers({
-  category,
   tag,
   search,
   sort = "bump",
   page = 0,
   limit = 20,
 }: {
-  category?: string;
   tag?: string;
   search?: string;
   sort?: "bump" | "member" | "new";
@@ -35,10 +31,8 @@ export async function getServers({
   limit?: number;
 } = {}): Promise<{ servers: Server[]; total: number }> {
   const supabase = await createClient();
-
   let q = supabase.from("servers").select("*", { count: "exact" });
 
-  if (category && category !== "all") q = q.eq("category", category);
   if (tag) q = q.contains("tags", [tag]);
   if (search) q = q.ilike("name", `%${search}%`);
 
@@ -53,17 +47,12 @@ export async function getServers({
     console.error("[getServers] Supabase error:", error);
     throw error;
   }
-
   return { servers: (data ?? []) as Server[], total: count ?? 0 };
 }
 
 export async function getServer(id: string): Promise<Server | null> {
   const supabase = await createClient();
-  const { data } = await supabase
-    .from("servers")
-    .select("*")
-    .eq("id", id)
-    .single();
+  const { data } = await supabase.from("servers").select("*").eq("id", id).single();
   return data as Server | null;
 }
 
