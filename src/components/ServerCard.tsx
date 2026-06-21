@@ -75,9 +75,9 @@ export default function ServerCard({ server }: { server: Server }) {
             target="_blank"
             rel="noopener noreferrer"
             onClick={(e) => e.stopPropagation()}
-            className="px-2.5 py-1 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition-colors"
+            className="group/join flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition-all"
           >
-            참여하기 <IconArrowRight size={10} stroke={2.5} className="inline" />
+            참여하기 <IconArrowRight size={10} stroke={2.5} className="inline transition-transform group-hover/join:translate-x-0.5" />
           </a>
         )}
       </div>
