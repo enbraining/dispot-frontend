@@ -4,8 +4,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
-import { IconUsers, IconArrowLeft, IconArrowUp, IconExternalLink, IconPencil } from "@tabler/icons-react";
-import BumpButton from "./BumpButton";
+import { IconUsers, IconArrowLeft, IconArrowUp, IconExternalLink } from "@tabler/icons-react";
+import ServerActions from "./ServerActions";
 
 export default async function ServerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -22,7 +22,6 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
       </Link>
 
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-6 flex flex-col gap-4">
-        {/* 로고 + 제목 + 버튼 */}
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-xl bg-indigo-100 dark:bg-indigo-900 overflow-hidden flex-shrink-0 flex items-center justify-center">
             {server.icon_url ? (
@@ -45,11 +44,7 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
             </div>
           </div>
           <div className="flex gap-2 flex-shrink-0">
-            <Link href={`/server/${server.id}/edit`} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 text-sm text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600 transition-colors">
-              <IconPencil size={14} stroke={1.5} />
-              수정
-            </Link>
-            <BumpButton serverId={server.id} bumpCount={server.bump_count} />
+            <ServerActions serverId={server.id} guildId={server.guild_id} />
             {server.invite_url && (
               <a
                 href={server.invite_url}
@@ -64,12 +59,10 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        {/* 설명 */}
         <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed">
           {server.description}
         </p>
 
-        {/* 태그 */}
         {server.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">
             {server.tags.map((tag) => (
@@ -79,6 +72,10 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
             ))}
           </div>
         )}
+
+        <p className="text-xs text-gray-400 dark:text-zinc-600 pt-1 border-t border-gray-50 dark:border-zinc-800">
+          범프는 Discord 서버에서 <code className="font-mono">/bump</code> 명령어로 할 수 있습니다.
+        </p>
       </div>
     </div>
   );
