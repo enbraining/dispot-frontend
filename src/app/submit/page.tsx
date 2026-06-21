@@ -115,7 +115,7 @@ function SubmitForm() {
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error ?? "오류가 발생했습니다.");
-      router.push(`/server/${data.id}`);
+      router.push(`/server/${data.id}?new=1`);
     } catch (e: unknown) {
       setError(e instanceof Error ? e.message : "오류가 발생했습니다.");
     } finally {

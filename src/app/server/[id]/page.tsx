@@ -6,6 +6,8 @@ import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import { IconUsers, IconArrowLeft, IconClock, IconExternalLink } from "@tabler/icons-react";
 import ServerActions from "./ServerActions";
+import NewServerBanner from "./NewServerBanner";
+import { Suspense } from "react";
 
 export default async function ServerPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
@@ -20,6 +22,10 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
         <IconArrowLeft size={15} stroke={1.5} />
         목록으로
       </Link>
+
+      <Suspense>
+        <NewServerBanner guildId={server.guild_id} />
+      </Suspense>
 
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-6 flex flex-col gap-4">
         <div className="flex items-center gap-4">
