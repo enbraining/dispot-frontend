@@ -23,6 +23,22 @@ function decodeBase64(encoded: string): string {
   return new TextDecoder().decode(bytes);
 }
 
+async function filterBotGuilds(guilds: DiscordGuild[]): Promise<DiscordGuild[]> {
+  if (guilds.length === 0) return [];
+  try {
+    const res = await fetch("/api/guilds/check", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ guild_ids: guilds.map((g) => g.id) }),
+    });
+    const botAdded: string[] = await res.json();
+    const set = new Set(botAdded);
+    return guilds.filter((g) => set.has(g.id));
+  } catch {
+    return guilds;
+  }
+}
+
 function botInviteUrl() {
   const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
   if (!clientId) return "https://discord.com/developers/applications";
@@ -50,34 +66,43 @@ function SubmitForm() {
 
   // OAuth 콜백 처리 + sessionStorage 동기화
   useEffect(() => {
-    const err = searchParams.get("error");
-    if (err) setError(err === "cancelled" ? "Discord 인증이 취소됐습니다." : "Discord 인증에 실패했습니다.");
+    async function init() {
+      const err = searchParams.get("error");
+      if (err) setError(err === "cancelled" ? "Discord 인증이 취소됐습니다." : "Discord 인증에 실패했습니다.");
 
-    const encoded = searchParams.get("guilds");
-    if (encoded) {
-      try {
-        const data: DiscordGuild[] = JSON.parse(decodeBase64(encoded));
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
-        setGuilds(data);
-        const encodedUser = searchParams.get("user");
-        if (encodedUser) {
-          const userData = JSON.parse(decodeBase64(encodedUser));
-          sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
-        }
-        window.dispatchEvent(new Event("dispot-login"));
-        router.replace("/submit");
-        return;
-      } catch {}
+      const encoded = searchParams.get("guilds");
+      if (encoded) {
+        try {
+          const data: DiscordGuild[] = JSON.parse(decodeBase64(encoded));
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
+          const filtered = await filterBotGuilds(data);
+          setGuilds(filtered);
+          const encodedUser = searchParams.get("user");
+          if (encodedUser) {
+            const userData = JSON.parse(decodeBase64(encodedUser));
+            sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
+          }
+          window.dispatchEvent(new Event("dispot-login"));
+          router.replace("/submit");
+          return;
+        } catch {}
+      }
+
+      // sessionStorage에서 복원
+      const stored = sessionStorage.getItem(SESSION_KEY);
+      if (stored) {
+        try {
+          const data: DiscordGuild[] = JSON.parse(stored);
+          const filtered = await filterBotGuilds(data);
+          setGuilds(filtered);
+          return;
+        } catch {}
+      }
+
+      // 미로그인
+      setGuilds([]);
     }
-
-    // sessionStorage에서 복원
-    const stored = sessionStorage.getItem(SESSION_KEY);
-    if (stored) {
-      try { setGuilds(JSON.parse(stored)); return; } catch {}
-    }
-
-    // 미로그인
-    setGuilds([]);
+    init();
   }, []);
 
   // 피커 외부 클릭 시 닫기
