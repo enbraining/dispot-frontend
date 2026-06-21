@@ -32,7 +32,7 @@ export default function ServerCard({ server }: { server: Server }) {
       </h2>
 
       {/* 설명 */}
-      <p className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-4 leading-relaxed flex-1 break-words overflow-hidden whitespace-pre-line">
+      <p className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-6 leading-relaxed flex-1 break-words overflow-hidden whitespace-pre-line">
         {server.description}
       </p>
 
