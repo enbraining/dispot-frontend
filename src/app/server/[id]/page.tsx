@@ -59,7 +59,7 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
               )}
               <span className="flex items-center gap-1">
                 <IconClock size={12} stroke={1.5} />
-                범프 {bumped}
+                {bumped}
               </span>
               {/* 모바일 전용 수정 버튼 */}
               <div className="sm:hidden ml-auto">

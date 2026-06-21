@@ -77,15 +77,13 @@ export default function ServerCard({ server }: { server: Server }) {
           </span>
         </div>
         {server.invite_url && (
-          <a
-            href={server.invite_url}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => e.stopPropagation()}
+          <button
+            type="button"
+            onClick={(e) => { e.preventDefault(); e.stopPropagation(); window.open(server.invite_url!, "_blank", "noopener,noreferrer"); }}
             className="group/join flex items-center gap-1 px-2.5 py-1 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition-all"
           >
             참여하기 <IconArrowRight size={10} stroke={2.5} className="inline transition-transform group-hover/join:translate-x-0.5" />
-          </a>
+          </button>
         )}
       </div>
     </Link>
