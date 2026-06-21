@@ -3,19 +3,27 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { IconSun, IconMoon, IconPlus, IconBrandDiscord, IconLogout, IconChevronDown } from "@tabler/icons-react";
+import { IconSun, IconMoon, IconPlus, IconBrandDiscord, IconLogout } from "@tabler/icons-react";
+import Image from "next/image";
 
 const SESSION_KEY = "dischan_guilds";
+const USER_KEY = "dischan_user";
 
 export default function Header() {
   const [dark, setDark] = useState(false);
   const [loggedIn, setLoggedIn] = useState(false);
+  const [avatar, setAvatar] = useState<string | null>(null);
   const [profileOpen, setProfileOpen] = useState(false);
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   useEffect(() => {
-    setLoggedIn(!!sessionStorage.getItem(SESSION_KEY));
+    const guilds = sessionStorage.getItem(SESSION_KEY);
+    setLoggedIn(!!guilds);
+    try {
+      const user = JSON.parse(sessionStorage.getItem(USER_KEY) ?? "null");
+      if (user?.avatar) setAvatar(user.avatar);
+    } catch {}
   }, []);
 
   useEffect(() => {
@@ -26,7 +34,6 @@ export default function Header() {
     document.documentElement.classList.toggle("dark", isDark);
   }, []);
 
-  // 프로필 드롭다운 외부 클릭 시 닫기
   useEffect(() => {
     if (!profileOpen) return;
     function onClick(e: MouseEvent) {
@@ -46,7 +53,9 @@ export default function Header() {
 
   function logout() {
     sessionStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(USER_KEY);
     setLoggedIn(false);
+    setAvatar(null);
     setProfileOpen(false);
     router.refresh();
   }
@@ -59,7 +68,6 @@ export default function Header() {
         </Link>
 
         <div className="flex items-center gap-2">
-          {/* 다크모드 토글 */}
           <button
             onClick={toggleDark}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
@@ -67,7 +75,6 @@ export default function Header() {
             {dark ? <IconSun size={16} stroke={1.5} /> : <IconMoon size={16} stroke={1.5} />}
           </button>
 
-          {/* 서버 등록 버튼 */}
           <Link
             href={loggedIn ? "/submit" : "/api/auth/discord"}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
@@ -76,17 +83,19 @@ export default function Header() {
             서버 등록
           </Link>
 
-          {/* 프로필 / Discord 로그인 */}
           {loggedIn ? (
             <div ref={profileRef} className="relative">
               <button
                 onClick={() => setProfileOpen((v) => !v)}
-                className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-600 dark:text-zinc-300 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+                className="w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-all flex-shrink-0"
               >
-                <div className="w-5 h-5 rounded-full bg-[#5865F2] flex items-center justify-center">
-                  <IconBrandDiscord size={12} className="text-white" stroke={1.5} />
-                </div>
-                <IconChevronDown size={12} stroke={1.5} className={`transition-transform ${profileOpen ? "rotate-180" : ""}`} />
+                {avatar ? (
+                  <Image src={avatar} alt="프로필" width={32} height={32} className="w-full h-full object-cover" />
+                ) : (
+                  <div className="w-full h-full bg-[#5865F2] flex items-center justify-center">
+                    <IconBrandDiscord size={14} className="text-white" stroke={1.5} />
+                  </div>
+                )}
               </button>
 
               {profileOpen && (

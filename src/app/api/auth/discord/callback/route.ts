@@ -25,7 +25,6 @@ export async function GET(req: NextRequest) {
     // 봇이 추가된 길드 (bot 스코프 사용 시 token.guild 포함)
     const botGuild: BotGuild | null = token.guild ?? null;
 
-    // 봇이 추가된 서버가 있으면 DB에 bot_added = true로 upsert
     if (botGuild) {
       const supabase = await createClient();
       const icon = botGuild.icon
@@ -43,12 +42,21 @@ export async function GET(req: NextRequest) {
         .select();
     }
 
-    // 관리자 권한 있는 길드 목록 (approximate_member_count 포함)
-    const guildsRes = await fetch(
-      "https://discord.com/api/users/@me/guilds?with_counts=true",
-      { headers: { Authorization: `Bearer ${token.access_token}` } }
-    );
+    // 유저 프로필 + 관리 길드 목록 병렬 fetch
+    const [userRes, guildsRes] = await Promise.all([
+      fetch("https://discord.com/api/users/@me", {
+        headers: { Authorization: `Bearer ${token.access_token}` },
+      }),
+      fetch("https://discord.com/api/users/@me/guilds?with_counts=true", {
+        headers: { Authorization: `Bearer ${token.access_token}` },
+      }),
+    ]);
+    const user: DiscordUser = await userRes.json();
     const guilds: DiscordGuild[] = await guildsRes.json();
+
+    const avatarUrl = user.avatar
+      ? `https://cdn.discordapp.com/avatars/${user.id}/${user.avatar}.png?size=64`
+      : `https://cdn.discordapp.com/embed/avatars/${Number(user.discriminator ?? "0") % 5}.png`;
 
     const MANAGE_GUILD = 0x20;
     const managed = guilds
@@ -60,9 +68,11 @@ export async function GET(req: NextRequest) {
         approximate_member_count: g.approximate_member_count ?? 0,
       }));
 
-    const encoded = Buffer.from(JSON.stringify(managed)).toString("base64url");
+    const encodedGuilds = Buffer.from(JSON.stringify(managed)).toString("base64url");
+    const encodedUser = Buffer.from(JSON.stringify({ avatar: avatarUrl, username: user.global_name ?? user.username })).toString("base64url");
+
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/submit?guilds=${encoded}`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/submit?guilds=${encodedGuilds}&user=${encodedUser}`
     );
   } catch (e) {
     console.error("[discord callback]", e);
@@ -70,6 +80,14 @@ export async function GET(req: NextRequest) {
       `${process.env.NEXT_PUBLIC_BASE_URL}/submit?error=failed`
     );
   }
+}
+
+interface DiscordUser {
+  id: string;
+  username: string;
+  global_name?: string | null;
+  avatar: string | null;
+  discriminator?: string;
 }
 
 interface DiscordGuild {

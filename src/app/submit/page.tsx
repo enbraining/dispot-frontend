@@ -14,6 +14,7 @@ interface DiscordGuild {
 }
 
 const SESSION_KEY = "dischan_guilds";
+const USER_KEY = "dischan_user";
 
 function botInviteUrl() {
   const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
@@ -51,7 +52,11 @@ function SubmitForm() {
         const data: DiscordGuild[] = JSON.parse(atob(encoded.replace(/-/g, "+").replace(/_/g, "/")));
         sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
         setGuilds(data);
-        // URL 파라미터 정리
+        const encodedUser = searchParams.get("user");
+        if (encodedUser) {
+          const userData = JSON.parse(atob(encodedUser.replace(/-/g, "+").replace(/_/g, "/")));
+          sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
+        }
         router.replace("/submit");
         return;
       } catch {}
