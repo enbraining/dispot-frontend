@@ -129,7 +129,7 @@ export default function ServerFeed() {
                 className={`px-2.5 py-0.5 rounded-full text-xs border transition-colors ${
                   tag === t
                     ? "bg-indigo-100 dark:bg-indigo-950 border-indigo-400 dark:border-indigo-600 text-indigo-700 dark:text-indigo-300 font-medium"
-                    : "border-gray-100 dark:border-zinc-800 text-gray-400 dark:text-zinc-500 hover:border-indigo-200 hover:text-indigo-500"
+                    : "border-gray-200 dark:border-zinc-700 text-gray-600 dark:text-zinc-300 hover:border-indigo-300 hover:text-indigo-500 dark:hover:border-indigo-600 dark:hover:text-indigo-400"
                 }`}
               >
                 #{t} <span className="opacity-60">({count.toLocaleString()})</span>

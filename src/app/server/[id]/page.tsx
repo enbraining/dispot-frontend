@@ -37,7 +37,7 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
             )}
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{server.name}</h1>
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight break-words">{server.name}</h1>
             <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-zinc-500">
               <span className="flex items-center gap-1">
                 <IconUsers size={12} stroke={1.5} />
@@ -65,7 +65,7 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed">
+        <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed break-words overflow-hidden">
           {server.description}
         </p>
 
