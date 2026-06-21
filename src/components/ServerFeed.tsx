@@ -139,9 +139,9 @@ export default function ServerFeed() {
         )}
       </div>
 
-      {/* Count + mobile filter */}
+      {/* mobile filter */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-400">총 {total?.toLocaleString()}개</p>
+        <div />
         <button
           onClick={() => setFilterOpen(true)}
           className={`sm:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium transition-colors ${
