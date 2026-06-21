@@ -40,7 +40,7 @@ export default function ServerCard({ server }: { server: Server }) {
       {server.tags.length > 0 && (
         <div className="flex flex-wrap gap-1">
           {server.tags.slice(0, 4).map((tag) => (
-            <span key={tag} className="text-xs font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 border border-indigo-100 dark:border-indigo-900 px-2 py-0.5 rounded-md">
+            <span key={tag} className="text-xs text-gray-400 dark:text-zinc-500 bg-gray-50 dark:bg-zinc-800 px-2 py-0.5 rounded-lg">
               #{tag}
             </span>
           ))}
