@@ -9,12 +9,16 @@ import type { Server } from "@/lib/db";
 
 export default function ServerCard({ server }: { server: Server }) {
   const bumped = formatDistanceToNow(new Date(server.bumped_at), { addSuffix: true, locale: ko });
+  const isNew = Date.now() - new Date(server.created_at).getTime() < 24 * 60 * 60 * 1000;
 
   return (
     <Link
       href={`/server/${server.id}`}
       className="group flex flex-col gap-3.5 p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-md transition-all relative"
     >
+      {isNew && (
+        <span className="absolute top-3.5 right-3.5 text-[10px] font-bold px-1.5 py-0.5 rounded-md bg-indigo-600 text-white tracking-wide">NEW</span>
+      )}
       {/* 로고 */}
       <div className="w-14 h-14 rounded-xl bg-indigo-100 dark:bg-indigo-900 overflow-hidden flex-shrink-0 flex items-center justify-center">
         {server.icon_url ? (

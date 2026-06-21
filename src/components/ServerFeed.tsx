@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect, useCallback, useRef } from "react";
-import { IconSearch, IconFilter, IconX } from "@tabler/icons-react";
+import { IconSearch, IconFilter, IconX, IconDice5 } from "@tabler/icons-react";
+import { useRouter } from "next/navigation";
 import ServerCard from "./ServerCard";
 import ServerCardSkeleton from "./ServerCardSkeleton";
 import type { Server } from "@/lib/db";
@@ -16,8 +17,10 @@ type Sort = "bump" | "member" | "new";
 interface TagCount { tag: string; count: number; }
 
 export default function ServerFeed() {
+  const router = useRouter();
   const [servers, setServers] = useState<Server[]>([]);
   const [total, setTotal] = useState(0);
+  const [randomLoading, setRandomLoading] = useState(false);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(0);
@@ -116,6 +119,20 @@ export default function ServerFeed() {
             <option key={o.value} value={o.value}>{o.label}</option>
           ))}
         </select>
+        <button
+          onClick={async () => {
+            setRandomLoading(true);
+            const res = await fetch("/api/servers/random");
+            const { id } = await res.json();
+            setRandomLoading(false);
+            if (id) router.push(`/server/${id}`);
+          }}
+          disabled={randomLoading}
+          title="랜덤 서버"
+          className="flex items-center justify-center w-10 h-10 rounded-xl border border-gray-200 dark:border-zinc-700 text-gray-400 hover:text-indigo-500 hover:border-indigo-300 dark:hover:border-indigo-600 transition-colors disabled:opacity-50 flex-shrink-0"
+        >
+          <IconDice5 size={16} stroke={1.5} className={randomLoading ? "animate-spin" : ""} />
+        </button>
       </div>
 
       {/* Desktop: 태그 */}
