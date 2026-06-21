@@ -1,13 +1,27 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { IconArrowLeft } from "@tabler/icons-react";
+import { useState, useEffect, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { IconArrowLeft, IconBrandDiscord, IconChevronDown } from "@tabler/icons-react";
 import Link from "next/link";
-import { CATEGORIES, type Category } from "@/lib/db";
+import Image from "next/image";
+import { CATEGORIES, type Category } from "@/types/category";
 
-export default function SubmitPage() {
+interface DiscordGuild {
+  id: string;
+  name: string;
+  icon: string | null;
+  approximate_member_count: number;
+}
+
+function SubmitForm() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+
+  const [guilds, setGuilds] = useState<DiscordGuild[]>([]);
+  const [guildPickerOpen, setGuildPickerOpen] = useState(false);
+  const [selectedGuild, setSelectedGuild] = useState<DiscordGuild | null>(null);
+
   const [form, setForm] = useState({
     name: "",
     description: "",
@@ -19,6 +33,30 @@ export default function SubmitPage() {
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  // Discord OAuth 콜백에서 길드 목록 파싱
+  useEffect(() => {
+    const encoded = searchParams.get("guilds");
+    const err = searchParams.get("error");
+    if (err) setError(err === "cancelled" ? "Discord 인증이 취소됐습니다." : "Discord 인증에 실패했습니다.");
+    if (!encoded) return;
+    try {
+      const data: DiscordGuild[] = JSON.parse(atob(encoded.replace(/-/g, "+").replace(/_/g, "/")));
+      setGuilds(data);
+      if (data.length === 1) applyGuild(data[0]);
+      else setGuildPickerOpen(true);
+    } catch {}
+  }, []);
+
+  function applyGuild(guild: DiscordGuild) {
+    setSelectedGuild(guild);
+    setGuildPickerOpen(false);
+    setForm((f) => ({
+      ...f,
+      name: guild.name,
+      member_count: String(guild.approximate_member_count),
+    }));
+  }
 
   function set(key: string, val: string | boolean) {
     setForm((f) => ({ ...f, [key]: val }));
@@ -35,6 +73,7 @@ export default function SubmitPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...form,
+          icon_url: selectedGuild?.icon ?? null,
           tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
           member_count: Number(form.member_count) || 0,
         }),
@@ -64,6 +103,85 @@ export default function SubmitPage() {
         <p className="text-sm text-gray-500 dark:text-zinc-400">디스코드 서버를 DISCHAN에 등록하세요.</p>
       </div>
 
+      {/* Discord OAuth 버튼 */}
+      <div className="flex flex-col gap-3">
+        <a
+          href="/api/auth/discord"
+          className="flex items-center justify-center gap-2 w-full py-2.5 rounded-xl bg-[#5865F2] hover:bg-[#4752c4] text-white text-sm font-semibold transition-colors"
+        >
+          <IconBrandDiscord size={18} stroke={1.5} />
+          Discord로 서버 정보 불러오기
+        </a>
+
+        {/* 길드 선택 피커 */}
+        {guilds.length > 1 && (
+          <div className="relative">
+            <button
+              type="button"
+              onClick={() => setGuildPickerOpen((v) => !v)}
+              className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30 text-sm text-gray-900 dark:text-white"
+            >
+              {selectedGuild ? (
+                <>
+                  {selectedGuild.icon ? (
+                    <Image src={selectedGuild.icon} alt={selectedGuild.name} width={24} height={24} className="rounded-full flex-shrink-0" />
+                  ) : (
+                    <span className="w-6 h-6 rounded-full bg-indigo-200 dark:bg-indigo-800 flex items-center justify-center text-xs font-bold flex-shrink-0">{selectedGuild.name[0]}</span>
+                  )}
+                  <span className="flex-1 text-left font-medium">{selectedGuild.name}</span>
+                </>
+              ) : (
+                <span className="flex-1 text-left text-gray-400">서버 선택...</span>
+              )}
+              <IconChevronDown size={14} stroke={1.5} className={`flex-shrink-0 transition-transform ${guildPickerOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {guildPickerOpen && (
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-20 max-h-60 overflow-y-auto">
+                {guilds.map((g) => (
+                  <button
+                    key={g.id}
+                    type="button"
+                    onClick={() => applyGuild(g)}
+                    className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors text-left"
+                  >
+                    {g.icon ? (
+                      <Image src={g.icon} alt={g.name} width={28} height={28} className="rounded-full flex-shrink-0" />
+                    ) : (
+                      <span className="w-7 h-7 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center text-sm font-bold text-indigo-500 flex-shrink-0">{g.name[0]}</span>
+                    )}
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900 dark:text-white truncate">{g.name}</p>
+                      <p className="text-xs text-gray-400">{g.approximate_member_count.toLocaleString()}명</p>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
+        {selectedGuild && guilds.length === 1 && (
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-xl border border-indigo-200 dark:border-indigo-800 bg-indigo-50 dark:bg-indigo-950/30">
+            {selectedGuild.icon ? (
+              <Image src={selectedGuild.icon} alt={selectedGuild.name} width={28} height={28} className="rounded-full flex-shrink-0" />
+            ) : (
+              <span className="w-7 h-7 rounded-full bg-indigo-200 dark:bg-indigo-800 flex items-center justify-center text-sm font-bold flex-shrink-0">{selectedGuild.name[0]}</span>
+            )}
+            <div>
+              <p className="text-sm font-medium text-gray-900 dark:text-white">{selectedGuild.name}</p>
+              <p className="text-xs text-gray-400">{selectedGuild.approximate_member_count.toLocaleString()}명 · 정보 자동 입력됨</p>
+            </div>
+          </div>
+        )}
+
+        <div className="flex items-center gap-3">
+          <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
+          <span className="text-xs text-gray-400">또는 직접 입력</span>
+          <div className="flex-1 h-px bg-gray-100 dark:bg-zinc-800" />
+        </div>
+      </div>
+
       <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-6 flex flex-col gap-5">
         <div className="flex flex-col gap-1.5">
           <label className={labelClass}>서버 이름 *</label>
@@ -84,7 +202,7 @@ export default function SubmitPage() {
           <label className={labelClass}>카테고리 *</label>
           <select value={form.category} onChange={(e) => set("category", e.target.value)} className={inputClass}>
             <option value="">카테고리 선택</option>
-            {CATEGORIES.map((c) => <option key={c} value={c}>{c}</option>)}
+            {CATEGORIES.map((c: Category) => <option key={c} value={c}>{c}</option>)}
           </select>
         </div>
 
@@ -94,7 +212,7 @@ export default function SubmitPage() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>멤버 수 (선택)</label>
+          <label className={labelClass}>멤버 수</label>
           <input value={form.member_count} onChange={(e) => set("member_count", e.target.value)} type="number" min="0" placeholder="0" className={inputClass} />
         </div>
 
@@ -105,14 +223,18 @@ export default function SubmitPage() {
 
         {error && <p className="text-xs text-red-500">{error}</p>}
 
-        <button
-          type="submit"
-          disabled={loading}
-          className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors"
-        >
+        <button type="submit" disabled={loading} className="w-full py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 disabled:opacity-50 text-white text-sm font-semibold transition-colors">
           {loading ? "등록 중..." : "등록하기"}
         </button>
       </form>
     </div>
+  );
+}
+
+export default function SubmitPage() {
+  return (
+    <Suspense>
+      <SubmitForm />
+    </Suspense>
   );
 }

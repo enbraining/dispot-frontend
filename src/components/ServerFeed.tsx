@@ -4,8 +4,8 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import { IconSearch, IconFilter, IconX } from "@tabler/icons-react";
 import ServerCard from "./ServerCard";
 import ServerCardSkeleton from "./ServerCardSkeleton";
-import type { Server, Category } from "@/lib/db";
-import { CATEGORIES } from "@/lib/db";
+import type { Server } from "@/lib/db";
+import { CATEGORIES } from "@/types/category";
 
 const SORT_OPTIONS = [
   { value: "bump", label: "최근 범프" },
@@ -31,46 +31,60 @@ export default function ServerFeed() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const searchTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const fetchServers = useCallback(async (opts: {
-    search: string; category: string; sort: Sort; page: number; replace?: boolean;
-  }) => {
-    const params = new URLSearchParams({
-      search: opts.search,
-      category: opts.category,
-      sort: opts.sort,
-      page: String(opts.page),
-    });
-    const res = await fetch(`/api/servers?${params}`);
-    const { servers: data, total } = await res.json();
-    setTotal(total);
-    if (opts.replace) {
-      setServers(data);
-    } else {
-      setServers((prev) => [...prev, ...data]);
-    }
-    setHasMore(data.length === 20);
-  }, []);
+  const fetchServers = useCallback(
+    async (opts: {
+      search: string;
+      category: string;
+      sort: Sort;
+      page: number;
+      replace?: boolean;
+    }) => {
+      const params = new URLSearchParams({
+        search: opts.search,
+        category: opts.category,
+        sort: opts.sort,
+        page: String(opts.page),
+      });
+      const res = await fetch(`/api/servers?${params}`);
+      const { servers: data, total } = await res.json();
+
+      setTotal(total);
+      if (opts.replace) {
+        setServers(data);
+      } else {
+        setServers((prev) => [...prev, ...(data ?? [])]);
+      }
+      setHasMore(data && data.length === 20);
+    },
+    [],
+  );
 
   useEffect(() => {
     setLoading(true);
     setPage(0);
-    fetchServers({ search, category, sort, page: 0, replace: true })
-      .finally(() => setLoading(false));
+    fetchServers({ search, category, sort, page: 0, replace: true }).finally(
+      () => setLoading(false),
+    );
   }, [search, category, sort]);
 
   useEffect(() => {
     if (page === 0) return;
     setLoadingMore(true);
-    fetchServers({ search, category, sort, page })
-      .finally(() => setLoadingMore(false));
+    fetchServers({ search, category, sort, page }).finally(() =>
+      setLoadingMore(false),
+    );
   }, [page]);
 
   useEffect(() => {
     const el = sentinelRef.current;
     if (!el) return;
-    const obs = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && hasMore && !loadingMore) setPage((p) => p + 1);
-    }, { rootMargin: "200px" });
+    const obs = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !loadingMore)
+          setPage((p) => p + 1);
+      },
+      { rootMargin: "200px" },
+    );
     obs.observe(el);
     return () => obs.disconnect();
   }, [hasMore, loadingMore]);
@@ -82,7 +96,9 @@ export default function ServerFeed() {
     } else {
       document.body.style.overflow = "";
     }
-    return () => { document.body.style.overflow = ""; };
+    return () => {
+      document.body.style.overflow = "";
+    };
   }, [filterOpen]);
 
   function handleSearch(val: string) {
@@ -95,7 +111,11 @@ export default function ServerFeed() {
       {/* Search + Sort */}
       <div className="flex gap-2 flex-wrap sm:flex-nowrap">
         <div className="relative flex-1 min-w-0">
-          <IconSearch size={14} stroke={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <IconSearch
+            size={14}
+            stroke={1.5}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+          />
           <input
             type="text"
             value={search}
@@ -110,7 +130,9 @@ export default function ServerFeed() {
           className="px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 focus:outline-none focus:border-indigo-400 transition-colors"
         >
           {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
+            <option key={o.value} value={o.value}>
+              {o.label}
+            </option>
           ))}
         </select>
       </div>
@@ -134,7 +156,7 @@ export default function ServerFeed() {
 
       {/* Count + mobile filter */}
       <div className="flex items-center justify-between">
-        <p className="text-xs text-gray-400">총 {total.toLocaleString()}개</p>
+        <p className="text-xs text-gray-400">총 {total?.toLocaleString()}개</p>
         <button
           onClick={() => setFilterOpen(true)}
           className={`sm:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium transition-colors ${
@@ -151,11 +173,19 @@ export default function ServerFeed() {
       {/* Mobile filter modal */}
       {filterOpen && (
         <div className="sm:hidden fixed inset-0 z-50 flex flex-col justify-end">
-          <div className="absolute inset-0 bg-black/40" onClick={() => setFilterOpen(false)} />
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setFilterOpen(false)}
+          />
           <div className="relative bg-white dark:bg-zinc-950 rounded-t-2xl p-5 flex flex-col gap-4">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-gray-900 dark:text-white">카테고리</span>
-              <button onClick={() => setFilterOpen(false)} className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-500">
+              <span className="text-sm font-semibold text-gray-900 dark:text-white">
+                카테고리
+              </span>
+              <button
+                onClick={() => setFilterOpen(false)}
+                className="w-7 h-7 flex items-center justify-center rounded-full bg-gray-100 dark:bg-zinc-800 text-gray-500"
+              >
                 <IconX size={14} stroke={2} />
               </button>
             </div>
@@ -175,7 +205,10 @@ export default function ServerFeed() {
               ))}
             </div>
             <button
-              onClick={() => { setCategory(pendingCategory); setFilterOpen(false); }}
+              onClick={() => {
+                setCategory(pendingCategory);
+                setFilterOpen(false);
+              }}
               className="w-full py-2.5 rounded-xl bg-indigo-600 text-white text-sm font-semibold"
             >
               적용
@@ -187,7 +220,9 @@ export default function ServerFeed() {
       {/* Grid */}
       {loading ? (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {Array.from({ length: 9 }).map((_, i) => <ServerCardSkeleton key={i} />)}
+          {Array.from({ length: 9 }).map((_, i) => (
+            <ServerCardSkeleton key={i} />
+          ))}
         </div>
       ) : servers.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-gray-400 gap-3">
@@ -195,8 +230,13 @@ export default function ServerFeed() {
         </div>
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {servers.map((s) => <ServerCard key={s.id} server={s} />)}
-          {loadingMore && Array.from({ length: 3 }).map((_, i) => <ServerCardSkeleton key={`more-${i}`} />)}
+          {servers.map((s) => (
+            <ServerCard key={s.id} server={s} />
+          ))}
+          {loadingMore &&
+            Array.from({ length: 3 }).map((_, i) => (
+              <ServerCardSkeleton key={`more-${i}`} />
+            ))}
         </div>
       )}
 
