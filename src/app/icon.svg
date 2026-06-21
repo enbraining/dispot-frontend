@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <defs>
+    <style>
+      @font-face { font-family: 'Space Mono'; font-weight: 700; src: url('/SpaceMono-Bold.woff2') format('woff2'); }
+      text { font-family: 'Space Mono', monospace; font-weight: 700; fill: #5865F2; }
+    </style>
+  </defs>
+  <text x="3" y="25" font-size="26">D</text>
+</svg>
