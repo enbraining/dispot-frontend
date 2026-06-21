@@ -6,8 +6,11 @@ import { useRouter } from "next/navigation";
 import { IconSun, IconMoon, IconPlus, IconBrandDiscord, IconLogout, IconLayoutDashboard } from "@tabler/icons-react";
 import Image from "next/image";
 
-const SESSION_KEY = "dispot_guilds";
-const USER_KEY = "dispot_user";
+function getCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const match = document.cookie.match(new RegExp(`(?:^|; )${name}=([^;]*)`));
+  return match ? decodeURIComponent(match[1]) : null;
+}
 
 export default function Header() {
   const [dark, setDark] = useState(false);
@@ -18,17 +21,21 @@ export default function Header() {
   const router = useRouter();
 
   function syncAuth() {
-    setLoggedIn(!!sessionStorage.getItem(SESSION_KEY));
-    try {
-      const user = JSON.parse(sessionStorage.getItem(USER_KEY) ?? "null");
-      setAvatar(user?.avatar ?? null);
-    } catch {}
+    const raw = getCookie("dispot_user");
+    if (raw) {
+      try {
+        const user = JSON.parse(raw);
+        setLoggedIn(true);
+        setAvatar(user?.avatar ?? null);
+        return;
+      } catch {}
+    }
+    setLoggedIn(false);
+    setAvatar(null);
   }
 
   useEffect(() => {
     syncAuth();
-    window.addEventListener("dispot-login", syncAuth);
-    return () => window.removeEventListener("dispot-login", syncAuth);
   }, []);
 
   useEffect(() => {
@@ -56,12 +63,12 @@ export default function Header() {
     localStorage.setItem("theme", next ? "dark" : "light");
   }
 
-  function logout() {
-    sessionStorage.removeItem(SESSION_KEY);
-    sessionStorage.removeItem(USER_KEY);
+  async function logout() {
+    await fetch("/api/auth/logout", { method: "POST" });
     setLoggedIn(false);
     setAvatar(null);
     setProfileOpen(false);
+    router.push("/");
     router.refresh();
   }
 

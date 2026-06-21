@@ -16,19 +16,18 @@ export default function DashboardPage() {
   const [servers, setServers] = useState<Server[] | null>(null);
 
   useEffect(() => {
-    const stored = sessionStorage.getItem(SESSION_KEY);
-    if (!stored) { router.replace("/api/auth/discord"); return; }
-
-    let guilds: { id: string }[] = [];
-    try { guilds = JSON.parse(stored); } catch { router.replace("/"); return; }
-
-    fetch("/api/dashboard", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ guild_ids: guilds.map((g) => g.id) }),
-    })
-      .then((r) => r.json())
-      .then(setServers);
+    fetch("/api/auth/guilds", { cache: "no-store" })
+      .then(async (r) => {
+        if (!r.ok) { router.replace("/api/auth/discord"); return; }
+        const guilds: { id: string }[] = await r.json();
+        return fetch("/api/dashboard", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ guild_ids: guilds.map((g) => g.id) }),
+        });
+      })
+      .then((r) => r?.json())
+      .then((data) => data && setServers(data));
   }, []);
 
   if (servers === null) return null;

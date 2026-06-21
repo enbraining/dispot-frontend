@@ -13,22 +13,21 @@ interface DiscordGuild {
   approximate_member_count: number;
 }
 
-const SESSION_KEY = "dispot_guilds";
+async function fetchAvailableGuilds(): Promise<{ guilds: DiscordGuild[]; loggedIn: boolean }> {
+  const guildsRes = await fetch("/api/auth/guilds", { cache: "no-store" });
+  if (!guildsRes.ok) return { guilds: [], loggedIn: false };
+  const all: DiscordGuild[] = await guildsRes.json();
+  if (!all.length) return { guilds: [], loggedIn: true };
 
-async function filterBotGuilds(guilds: DiscordGuild[]): Promise<DiscordGuild[]> {
-  if (guilds.length === 0) return [];
-  try {
-    const res = await fetch("/api/guilds/check", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ guild_ids: guilds.map((g) => g.id) }),
-    });
-    const { available }: { available: string[]; registered: string[] } = await res.json();
-    const set = new Set(available);
-    return guilds.filter((g) => set.has(g.id));
-  } catch {
-    return guilds;
-  }
+  const checkRes = await fetch("/api/guilds/check", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ guild_ids: all.map((g) => g.id) }),
+  });
+  if (!checkRes.ok) return { guilds: all, loggedIn: true };
+  const { available }: { available: string[] } = await checkRes.json();
+  const set = new Set(available);
+  return { guilds: all.filter((g) => set.has(g.id)), loggedIn: true };
 }
 
 function botInviteUrl() {
@@ -40,7 +39,7 @@ function botInviteUrl() {
 function SubmitForm() {
   const router = useRouter();
 
-  const [guilds, setGuilds] = useState<DiscordGuild[] | null>(null); // null = 로드 전
+  const [guilds, setGuilds] = useState<DiscordGuild[] | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [guildPickerOpen, setGuildPickerOpen] = useState(false);
   const [selectedGuild, setSelectedGuild] = useState<DiscordGuild | null>(null);
@@ -58,38 +57,15 @@ function SubmitForm() {
   const [refreshing, setRefreshing] = useState(false);
 
   async function loadGuilds() {
-    const stored = sessionStorage.getItem(SESSION_KEY);
-    if (stored) {
-      try {
-        const data: DiscordGuild[] = JSON.parse(stored);
-        setLoggedIn(true);
-        const filtered = await filterBotGuilds(data);
-        setGuilds(filtered);
-        return;
-      } catch {}
-    }
-    setLoggedIn(false);
-    setGuilds([]);
+    const { guilds: data, loggedIn: li } = await fetchAvailableGuilds();
+    setLoggedIn(li);
+    setGuilds(data);
   }
 
   useEffect(() => { loadGuilds(); }, []);
 
   async function handleRefresh() {
     setRefreshing(true);
-    try {
-      const token = sessionStorage.getItem("dispot_token");
-      if (token) {
-        const res = await fetch("/api/auth/guilds", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ access_token: token }),
-        });
-        if (res.ok) {
-          const fresh = await res.json();
-          sessionStorage.setItem(SESSION_KEY, JSON.stringify(fresh));
-        }
-      }
-    } catch {}
     await loadGuilds();
     setRefreshing(false);
   }

@@ -2,12 +2,12 @@ import { NextRequest, NextResponse } from "next/server";
 
 const MANAGE_GUILD = 0x20;
 
-export async function POST(req: NextRequest) {
-  const { access_token } = await req.json();
-  if (!access_token) return NextResponse.json({ error: "no token" }, { status: 400 });
+export async function GET(req: NextRequest) {
+  const token = req.cookies.get("dispot_token")?.value;
+  if (!token) return NextResponse.json({ error: "unauthenticated" }, { status: 401 });
 
   const res = await fetch("https://discord.com/api/users/@me/guilds?with_counts=true", {
-    headers: { Authorization: `Bearer ${access_token}` },
+    headers: { Authorization: `Bearer ${token}` },
     cache: "no-store",
   });
 

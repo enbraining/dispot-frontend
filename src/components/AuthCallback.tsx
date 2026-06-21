@@ -1,37 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
-import { useSearchParams } from "next/navigation";
-
-function decodeBase64(encoded: string): string {
-  const binary = atob(encoded.replace(/-/g, "+").replace(/_/g, "/"));
-  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
-}
-
+// 쿠키 기반 인증으로 전환 후 더 이상 사용하지 않음
 export default function AuthCallback() {
-  const params = useSearchParams();
-
-  useEffect(() => {
-    const guilds = params.get("guilds");
-    const user = params.get("user");
-    const token = params.get("token");
-    if (!guilds || !user) return;
-
-    try {
-      sessionStorage.setItem("dispot_guilds", decodeBase64(guilds));
-      sessionStorage.setItem("dispot_user", decodeBase64(user));
-      if (token) sessionStorage.setItem("dispot_token", decodeBase64(token));
-      window.dispatchEvent(new Event("dispot-login"));
-
-      // 쿼리파라미터 제거 (히스토리 교체)
-      const url = new URL(window.location.href);
-      url.searchParams.delete("guilds");
-      url.searchParams.delete("user");
-      url.searchParams.delete("token");
-      window.history.replaceState(null, "", url.toString());
-    } catch {}
-  }, []);
-
   return null;
 }

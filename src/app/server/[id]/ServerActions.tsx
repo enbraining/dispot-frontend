@@ -4,16 +4,15 @@ import { useEffect, useState } from "react";
 import Link from "next/link";
 import { IconPencil } from "@tabler/icons-react";
 
-const SESSION_KEY = "dispot_guilds";
-
 export default function ServerActions({ serverId, guildId, compact = false }: { serverId: string; guildId: string | null; compact?: boolean }) {
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
-    try {
-      const guilds: { id: string }[] = JSON.parse(sessionStorage.getItem(SESSION_KEY) ?? "[]");
-      setIsOwner(guilds.some((g) => g.id === guildId));
-    } catch {}
+    if (!guildId) return;
+    fetch("/api/auth/guilds", { cache: "no-store" })
+      .then((r) => r.ok ? r.json() : [])
+      .then((guilds: { id: string }[]) => setIsOwner(guilds.some((g) => g.id === guildId)))
+      .catch(() => {});
   }, [guildId]);
 
   if (!isOwner) return null;
