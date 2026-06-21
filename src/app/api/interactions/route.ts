@@ -1,17 +1,23 @@
+export const runtime = "nodejs";
+
 import { NextRequest, NextResponse } from "next/server";
-import nacl from "tweetnacl";
+import { sign } from "tweetnacl";
 import { createAdminClient } from "@/lib/supabase-admin";
 
 const PUBLIC_KEY = process.env.DISCORD_PUBLIC_KEY!;
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN!;
 
-// Discord 서명 검증
+function hexToBytes(hex: string): Uint8Array {
+  const arr = new Uint8Array(hex.length / 2);
+  for (let i = 0; i < hex.length; i += 2)
+    arr[i / 2] = parseInt(hex.slice(i, i + 2), 16);
+  return arr;
+}
+
 function verify(signature: string, timestamp: string, body: string): boolean {
-  return nacl.sign.detached.verify(
-    Buffer.from(timestamp + body),
-    Buffer.from(signature, "hex"),
-    Buffer.from(PUBLIC_KEY, "hex")
-  );
+  const enc = new TextEncoder();
+  const msg = new Uint8Array([...enc.encode(timestamp), ...enc.encode(body)]);
+  return sign.detached.verify(msg, hexToBytes(signature), hexToBytes(PUBLIC_KEY));
 }
 
 export async function POST(req: NextRequest) {

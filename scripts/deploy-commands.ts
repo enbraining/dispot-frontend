@@ -1,6 +1,10 @@
 // pnpm deploy-commands
 export {};
 
+// .env.local 로드
+import { config } from "dotenv";
+config({ path: ".env" });
+
 const CLIENT_ID = process.env.DISCORD_CLIENT_ID!;
 const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN!;
 

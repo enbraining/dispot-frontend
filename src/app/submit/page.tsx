@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, Suspense, useRef } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import { IconArrowLeft, IconChevronDown, IconX, IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
 import Image from "next/image";
@@ -14,14 +14,6 @@ interface DiscordGuild {
 }
 
 const SESSION_KEY = "dispot_guilds";
-const USER_KEY = "dispot_user";
-
-// atob은 Latin-1만 처리 → TextDecoder로 UTF-8 디코딩
-function decodeBase64(encoded: string): string {
-  const binary = atob(encoded.replace(/-/g, "+").replace(/_/g, "/"));
-  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
-  return new TextDecoder().decode(bytes);
-}
 
 async function filterBotGuilds(guilds: DiscordGuild[]): Promise<DiscordGuild[]> {
   if (guilds.length === 0) return [];
@@ -47,7 +39,6 @@ function botInviteUrl() {
 
 function SubmitForm() {
   const router = useRouter();
-  const searchParams = useSearchParams();
 
   const [guilds, setGuilds] = useState<DiscordGuild[] | null>(null); // null = 로드 전
   const [loggedIn, setLoggedIn] = useState(false);
@@ -65,32 +56,8 @@ function SubmitForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // OAuth 콜백 처리 + sessionStorage 동기화
   useEffect(() => {
     async function init() {
-      const err = searchParams.get("error");
-      if (err) setError(err === "cancelled" ? "Discord 인증이 취소됐습니다." : "Discord 인증에 실패했습니다.");
-
-      const encoded = searchParams.get("guilds");
-      if (encoded) {
-        try {
-          const data: DiscordGuild[] = JSON.parse(decodeBase64(encoded));
-          sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
-          const encodedUser = searchParams.get("user");
-          if (encodedUser) {
-            const userData = JSON.parse(decodeBase64(encodedUser));
-            sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
-          }
-          window.dispatchEvent(new Event("dispot-login"));
-          router.replace("/submit");
-          setLoggedIn(true);
-          const filtered = await filterBotGuilds(data);
-          setGuilds(filtered);
-          return;
-        } catch {}
-      }
-
-      // sessionStorage에서 복원
       const stored = sessionStorage.getItem(SESSION_KEY);
       if (stored) {
         try {
@@ -101,8 +68,6 @@ function SubmitForm() {
           return;
         } catch {}
       }
-
-      // 미로그인
       setLoggedIn(false);
       setGuilds([]);
     }

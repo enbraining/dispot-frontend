@@ -1,9 +1,13 @@
+import { Suspense } from "react";
 import ServerFeed from "@/components/ServerFeed";
+import AuthCallback from "@/components/AuthCallback";
 
 export default function HomePage() {
   return (
     <div className="flex flex-col gap-8">
-      {/* Hero */}
+      <Suspense>
+        <AuthCallback />
+      </Suspense>
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
           디스코드 서버 찾기
