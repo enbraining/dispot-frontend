@@ -290,10 +290,29 @@ function SubmitForm() {
           <p className="text-xs text-gray-400">최대 10개 · Backspace로 마지막 태그 삭제</p>
         </div>
 
-        <label className="flex items-center gap-2.5 cursor-pointer">
-          <input type="checkbox" checked={form.nsfw} onChange={(e) => set("nsfw", e.target.checked)} className="w-4 h-4 rounded accent-indigo-600" />
-          <span className="text-sm text-gray-600 dark:text-zinc-400">18+ 서버 (NSFW)</span>
-        </label>
+        {/* NSFW 커스텀 셀렉터 */}
+        <div className="flex flex-col gap-1.5">
+          <label className={labelClass}>연령 제한</label>
+          <div className="grid grid-cols-2 gap-2">
+            {([false, true] as const).map((val) => (
+              <button
+                key={String(val)}
+                type="button"
+                onClick={() => set("nsfw", val)}
+                className={`flex flex-col items-start gap-0.5 px-4 py-3 rounded-xl border text-sm transition-colors ${
+                  form.nsfw === val
+                    ? val
+                      ? "border-red-400 bg-red-50 dark:bg-red-950/30 text-red-600 dark:text-red-400"
+                      : "border-indigo-400 bg-indigo-50 dark:bg-indigo-950/30 text-indigo-600 dark:text-indigo-400"
+                    : "border-gray-200 dark:border-zinc-700 text-gray-500 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600"
+                }`}
+              >
+                <span className="font-semibold">{val ? "18+" : "전체 이용가"}</span>
+                <span className="text-xs opacity-70">{val ? "성인 전용 서버" : "누구나 이용 가능"}</span>
+              </button>
+            ))}
+          </div>
+        </div>
 
         {error && <p className="text-xs text-red-500">{error}</p>}
 
