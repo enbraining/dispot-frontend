@@ -170,32 +170,6 @@ function SubmitForm() {
   // 미로그인
   if (!loggedIn) return null;
 
-  // 로그인했지만 봇이 추가된 서버 없음
-  if (guilds.length === 0) {
-    return (
-      <div className="max-w-lg mx-auto flex flex-col gap-6">
-        <Link href="/" className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 transition-colors w-fit">
-          <IconArrowLeft size={15} stroke={1.5} />
-          목록으로
-        </Link>
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-8 flex flex-col items-center gap-5 text-center">
-          <div className="text-4xl">🤖</div>
-          <div className="flex flex-col gap-1.5">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white">봇이 추가된 서버가 없습니다</h2>
-            <p className="text-sm text-gray-500 dark:text-zinc-400">서버를 등록하려면 먼저 봇을 추가해야 합니다.</p>
-          </div>
-          <a
-            href={botInviteUrl()}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold transition-colors"
-          >
-            봇 추가하기
-          </a>
-        </div>
-      </div>
-    );
-  }
 
   return (
     <div className="max-w-lg mx-auto flex flex-col gap-6">
