@@ -31,8 +31,8 @@ async function filterBotGuilds(guilds: DiscordGuild[]): Promise<DiscordGuild[]> 
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ guild_ids: guilds.map((g) => g.id) }),
     });
-    const botAdded: string[] = await res.json();
-    const set = new Set(botAdded);
+    const { available }: { available: string[]; registered: string[] } = await res.json();
+    const set = new Set(available);
     return guilds.filter((g) => set.has(g.id));
   } catch {
     return guilds;
