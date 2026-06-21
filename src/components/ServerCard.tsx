@@ -2,13 +2,20 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
-import { ko } from "date-fns/locale";
 import { IconUsers, IconClock, IconArrowRight } from "@tabler/icons-react";
 import type { Server } from "@/lib/db";
 
+function timeAgo(date: string) {
+  const diff = Date.now() - new Date(date).getTime();
+  const mins = Math.floor(diff / 60000);
+  if (mins < 60) return `${mins}분 전`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours}시간 전`;
+  return `${Math.floor(hours / 24)}일 전`;
+}
+
 export default function ServerCard({ server }: { server: Server }) {
-  const bumped = formatDistanceToNow(new Date(server.bumped_at), { addSuffix: true, locale: ko });
+  const bumped = timeAgo(server.bumped_at);
   const isNew = Date.now() - new Date(server.created_at).getTime() < 24 * 60 * 60 * 1000;
 
   return (

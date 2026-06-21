@@ -2,8 +2,6 @@ import { getServer } from "@/lib/db";
 import { notFound } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
-import { formatDistanceToNow } from "date-fns";
-import { ko } from "date-fns/locale";
 import { IconUsers, IconArrowLeft, IconClock, IconExternalLink } from "@tabler/icons-react";
 import ServerActions from "./ServerActions";
 import NewServerBanner from "./NewServerBanner";
@@ -14,7 +12,14 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
   const server = await getServer(id);
   if (!server) notFound();
 
-  const bumped = formatDistanceToNow(new Date(server.bumped_at), { addSuffix: true, locale: ko });
+  const bumped = (() => {
+    const diff = Date.now() - new Date(server.bumped_at).getTime();
+    const mins = Math.floor(diff / 60000);
+    if (mins < 60) return `${mins}분 전`;
+    const hours = Math.floor(mins / 60);
+    if (hours < 24) return `${hours}시간 전`;
+    return `${Math.floor(hours / 24)}일 전`;
+  })();
 
   return (
     <div className="flex flex-col gap-6 max-w-2xl mx-auto">
