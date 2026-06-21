@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { IconArrowLeft, IconChevronDown, IconX, IconExternalLink } from "@tabler/icons-react";
+import { IconArrowLeft, IconChevronDown, IconX, IconExternalLink, IconRefresh } from "@tabler/icons-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -55,24 +55,30 @@ function SubmitForm() {
   const tagInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
 
-  useEffect(() => {
-    async function init() {
-      const stored = sessionStorage.getItem(SESSION_KEY);
-      if (stored) {
-        try {
-          const data: DiscordGuild[] = JSON.parse(stored);
-          setLoggedIn(true);
-          const filtered = await filterBotGuilds(data);
-          setGuilds(filtered);
-          return;
-        } catch {}
-      }
-      setLoggedIn(false);
-      setGuilds([]);
+  async function loadGuilds() {
+    const stored = sessionStorage.getItem(SESSION_KEY);
+    if (stored) {
+      try {
+        const data: DiscordGuild[] = JSON.parse(stored);
+        setLoggedIn(true);
+        const filtered = await filterBotGuilds(data);
+        setGuilds(filtered);
+        return;
+      } catch {}
     }
-    init();
-  }, []);
+    setLoggedIn(false);
+    setGuilds([]);
+  }
+
+  useEffect(() => { loadGuilds(); }, []);
+
+  async function handleRefresh() {
+    setRefreshing(true);
+    await loadGuilds();
+    setRefreshing(false);
+  }
 
   // 피커 외부 클릭 시 닫기
   useEffect(() => {
@@ -205,7 +211,7 @@ function SubmitForm() {
                     </button>
                   ))}
                 </div>
-                <div className="border-t border-gray-100 dark:border-zinc-800 px-4 py-2.5">
+                <div className="border-t border-gray-100 dark:border-zinc-800 px-4 py-2.5 flex items-center justify-between">
                   <a
                     href={botInviteUrl()}
                     target="_blank"
@@ -213,8 +219,17 @@ function SubmitForm() {
                     className="flex items-center gap-1.5 text-xs text-gray-400 hover:text-indigo-500 transition-colors"
                   >
                     <IconExternalLink size={11} stroke={1.5} />
-                    목록에 서버가 보이지 않는다면? 봇 추가하기
+                    봇 추가하기
                   </a>
+                  <button
+                    type="button"
+                    onClick={handleRefresh}
+                    disabled={refreshing}
+                    className="flex items-center gap-1 text-xs text-gray-400 hover:text-indigo-500 transition-colors disabled:opacity-50"
+                  >
+                    <IconRefresh size={11} stroke={1.5} className={refreshing ? "animate-spin" : ""} />
+                    새로고침
+                  </button>
                 </div>
               </div>
             )}
