@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import localFont from "next/font/local";
+import { Space_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
 
@@ -14,8 +15,9 @@ const pretendard = localFont({
   display: "swap",
 });
 
-const spaceMono = localFont({
-  src: [{ path: "../../public/SpaceMono-Bold.woff2", weight: "700" }],
+const spaceMono = Space_Mono({
+  weight: ["400", "700"],
+  subsets: ["latin"],
   variable: "--font-space-mono",
   display: "swap",
 });
