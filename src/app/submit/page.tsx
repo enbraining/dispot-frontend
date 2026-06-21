@@ -270,7 +270,7 @@ function SubmitForm() {
                 if (e.key === "Enter") {
                   e.preventDefault();
                   const val = tagInput.trim();
-                  if (val && !form.tags.includes(val) && form.tags.length < 10)
+                  if (val && !form.tags.includes(val) && form.tags.length < 5)
                     set("tags", [...form.tags, val]);
                   setTagInput("");
                 }
@@ -281,7 +281,7 @@ function SubmitForm() {
               className="flex-1 min-w-24 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
             />
           </div>
-          <p className="text-xs text-gray-400">최대 10개 · Backspace로 마지막 태그 삭제</p>
+          <p className="text-xs text-gray-400">최대 5개 · Backspace로 마지막 태그 삭제</p>
         </div>
 
         {/* NSFW 커스텀 셀렉터 */}
