@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { IconArrowLeft, IconArrowUp, IconPencil, IconPlus, IconUsers } from "@tabler/icons-react";
+import { IconArrowLeft, IconArrowUp, IconPencil, IconPlus, IconUsers, IconTrash } from "@tabler/icons-react";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { Server } from "@/lib/db";
@@ -56,7 +56,7 @@ export default function DashboardPage() {
       ) : (
         <div className="flex flex-col gap-3">
           {servers.map((server) => (
-            <DashboardCard key={server.id} server={server} />
+            <DashboardCard key={server.id} server={server} onDelete={(id) => setServers((s) => s?.filter((x) => x.id !== id) ?? [])} />
           ))}
         </div>
       )}
@@ -64,8 +64,16 @@ export default function DashboardPage() {
   );
 }
 
-function DashboardCard({ server }: { server: Server }) {
+function DashboardCard({ server, onDelete }: { server: Server; onDelete: (id: string) => void }) {
   const bumped = formatDistanceToNow(new Date(server.bumped_at), { addSuffix: true, locale: ko });
+  const [deleting, setDeleting] = useState(false);
+
+  async function handleDelete() {
+    if (!confirm(`"${server.name}" 서버를 삭제하시겠습니까?`)) return;
+    setDeleting(true);
+    await fetch(`/api/servers/${server.id}`, { method: "DELETE" });
+    onDelete(server.id);
+  }
 
   return (
     <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-5 flex items-center gap-4">
@@ -95,6 +103,10 @@ function DashboardCard({ server }: { server: Server }) {
           <IconPencil size={11} stroke={1.5} />
           수정
         </Link>
+        <button onClick={handleDelete} disabled={deleting} className="flex items-center gap-1 px-3 py-1.5 rounded-lg border border-red-200 dark:border-red-900 text-xs text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors disabled:opacity-50">
+          <IconTrash size={11} stroke={1.5} />
+          삭제
+        </button>
       </div>
     </div>
   );

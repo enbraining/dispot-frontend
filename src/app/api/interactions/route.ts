@@ -1,0 +1,122 @@
+import { NextRequest, NextResponse } from "next/server";
+import nacl from "tweetnacl";
+import { createAdminClient } from "@/lib/supabase-admin";
+
+const PUBLIC_KEY = process.env.DISCORD_PUBLIC_KEY!;
+const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN!;
+
+// Discord 서명 검증
+function verify(signature: string, timestamp: string, body: string): boolean {
+  return nacl.sign.detached.verify(
+    Buffer.from(timestamp + body),
+    Buffer.from(signature, "hex"),
+    Buffer.from(PUBLIC_KEY, "hex")
+  );
+}
+
+export async function POST(req: NextRequest) {
+  const signature = req.headers.get("x-signature-ed25519") ?? "";
+  const timestamp = req.headers.get("x-signature-timestamp") ?? "";
+  const body = await req.text();
+
+  if (!verify(signature, timestamp, body)) {
+    return new NextResponse("Unauthorized", { status: 401 });
+  }
+
+  const data = JSON.parse(body);
+
+  // PING
+  if (data.type === 1) {
+    return NextResponse.json({ type: 1 });
+  }
+
+  // 슬래시 커맨드
+  if (data.type === 2) {
+    const { name } = data.data;
+    const guildId: string = data.guild_id;
+
+    if (name === "bump") return handleBump(guildId);
+    if (name === "register") return handleRegister(guildId, data);
+  }
+
+  return NextResponse.json({ type: 1 });
+}
+
+async function handleBump(guildId: string) {
+  const supabase = createAdminClient();
+  const { data: server } = await supabase
+    .from("servers")
+    .select("id, bumped_at, bump_count, bot_added")
+    .eq("guild_id", guildId)
+    .single();
+
+  if (!server?.bot_added) {
+    return msg("DISPOT에 등록되지 않은 서버입니다. `/register`로 초대 채널을 먼저 설정해주세요.", true);
+  }
+
+  const cooldown = 2 * 60 * 60 * 1000;
+  const remaining = cooldown - (Date.now() - new Date(server.bumped_at).getTime());
+  if (remaining > 0) {
+    const mins = Math.ceil(remaining / 60000);
+    return msg(`⏳ 쿨다운 중입니다. **${mins}분** 후에 다시 시도해주세요.`, true);
+  }
+
+  await supabase
+    .from("servers")
+    .update({ bump_count: server.bump_count + 1, bumped_at: new Date().toISOString() })
+    .eq("id", server.id);
+
+  return msg("✅ 서버가 DISPOT 상단으로 올라갔습니다!");
+}
+
+async function handleRegister(guildId: string, interaction: InteractionData) {
+  const channelId = interaction.data.resolved
+    ? Object.keys(interaction.data.resolved.channels ?? {})[0]
+    : interaction.data.options?.[0]?.value as string;
+
+  if (!channelId) return msg("채널을 선택해주세요.", true);
+
+  // 멤버 권한 확인
+  const memberPerms = BigInt(interaction.member?.permissions ?? "0");
+  const MANAGE_GUILD = BigInt(0x20);
+  if ((memberPerms & MANAGE_GUILD) !== MANAGE_GUILD) {
+    return msg("서버 관리 권한이 필요합니다.", true);
+  }
+
+  // Discord REST API로 초대 링크 생성
+  const inviteRes = await fetch(`https://discord.com/api/channels/${channelId}/invites`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bot ${BOT_TOKEN}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ max_age: 0, max_uses: 0 }),
+  });
+
+  if (!inviteRes.ok) {
+    return msg("초대 링크 생성 실패. 봇에게 초대 링크 생성 권한이 있는지 확인해주세요.", true);
+  }
+
+  const invite = await inviteRes.json();
+  const inviteUrl = `https://discord.gg/${invite.code}`;
+
+  const supabase = createAdminClient();
+  await supabase.from("servers").update({ invite_url: inviteUrl }).eq("guild_id", guildId);
+
+  return msg(`✅ 초대 링크가 등록되었습니다: ${inviteUrl}`);
+}
+
+function msg(content: string, ephemeral = false) {
+  return NextResponse.json({
+    type: 4,
+    data: { content, flags: ephemeral ? 64 : 0 },
+  });
+}
+
+interface InteractionData {
+  member?: { permissions: string };
+  data: {
+    options?: { name: string; value: string }[];
+    resolved?: { channels?: Record<string, unknown> };
+  };
+}
