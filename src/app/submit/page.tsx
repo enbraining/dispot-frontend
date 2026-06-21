@@ -76,6 +76,20 @@ function SubmitForm() {
 
   async function handleRefresh() {
     setRefreshing(true);
+    try {
+      const token = sessionStorage.getItem("dispot_token");
+      if (token) {
+        const res = await fetch("/api/auth/guilds", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ access_token: token }),
+        });
+        if (res.ok) {
+          const fresh = await res.json();
+          sessionStorage.setItem(SESSION_KEY, JSON.stringify(fresh));
+        }
+      }
+    } catch {}
     await loadGuilds();
     setRefreshing(false);
   }

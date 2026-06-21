@@ -50,9 +50,10 @@ export async function GET(req: NextRequest) {
 
     const encodedGuilds = Buffer.from(JSON.stringify(managed)).toString("base64url");
     const encodedUser = Buffer.from(JSON.stringify({ avatar: avatarUrl, username: user.global_name ?? user.username })).toString("base64url");
+    const encodedToken = Buffer.from(token.access_token).toString("base64url");
 
     return NextResponse.redirect(
-      `${process.env.NEXT_PUBLIC_BASE_URL}/?guilds=${encodedGuilds}&user=${encodedUser}`
+      `${process.env.NEXT_PUBLIC_BASE_URL}/?guilds=${encodedGuilds}&user=${encodedUser}&token=${encodedToken}`
     );
   } catch (e) {
     console.error("[discord callback]", e);

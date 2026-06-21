@@ -15,17 +15,20 @@ export default function AuthCallback() {
   useEffect(() => {
     const guilds = params.get("guilds");
     const user = params.get("user");
+    const token = params.get("token");
     if (!guilds || !user) return;
 
     try {
       sessionStorage.setItem("dispot_guilds", decodeBase64(guilds));
       sessionStorage.setItem("dispot_user", decodeBase64(user));
+      if (token) sessionStorage.setItem("dispot_token", decodeBase64(token));
       window.dispatchEvent(new Event("dispot-login"));
 
       // 쿼리파라미터 제거 (히스토리 교체)
       const url = new URL(window.location.href);
       url.searchParams.delete("guilds");
       url.searchParams.delete("user");
+      url.searchParams.delete("token");
       window.history.replaceState(null, "", url.toString());
     } catch {}
   }, []);
