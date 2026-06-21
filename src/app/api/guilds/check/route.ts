@@ -1,18 +1,17 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase-server";
 
-// 봇 토큰으로 해당 길드에 봇이 실제로 있는지 Discord API에서 확인
-async function isBotInGuild(guildId: string): Promise<boolean> {
+// 봇이 참여 중인 서버 ID 목록
+async function getBotGuildIds(): Promise<Set<string>> {
   const token = process.env.DISCORD_BOT_TOKEN;
-  if (!token) return false;
-  try {
-    const res = await fetch(`https://discord.com/api/guilds/${guildId}/members/@me`, {
-      headers: { Authorization: `Bot ${token}` },
-    });
-    return res.ok;
-  } catch {
-    return false;
-  }
+  if (!token) return new Set();
+  const res = await fetch("https://discord.com/api/users/@me/guilds", {
+    headers: { Authorization: `Bot ${token}` },
+    next: { revalidate: 60 }, // 1분 캐시
+  });
+  if (!res.ok) return new Set();
+  const guilds: { id: string }[] = await res.json();
+  return new Set(guilds.map((g) => g.id));
 }
 
 export async function POST(req: NextRequest) {
@@ -21,31 +20,17 @@ export async function POST(req: NextRequest) {
     return NextResponse.json([]);
   }
 
-  const supabase = await createClient();
+  const botGuildIds = await getBotGuildIds();
+  const matched = (guild_ids as string[]).filter((id) => botGuildIds.has(id));
 
-  // DB에서 이미 확인된 것
-  const { data: existing } = await supabase
-    .from("servers")
-    .select("guild_id")
-    .in("guild_id", guild_ids)
-    .eq("bot_added", true);
+  // bot_added 동기화
+  if (matched.length > 0) {
+    const supabase = await createClient();
+    await supabase.from("servers").upsert(
+      matched.map((id) => ({ guild_id: id, bot_added: true, bumped_at: new Date().toISOString() })),
+      { onConflict: "guild_id" }
+    );
+  }
 
-  const confirmed = new Set((existing ?? []).map((r) => r.guild_id));
-
-  // DB에 없는 것은 Discord API로 직접 확인 후 upsert
-  const unconfirmed = guild_ids.filter((id) => !confirmed.has(id));
-  await Promise.all(
-    unconfirmed.map(async (id) => {
-      const inGuild = await isBotInGuild(id);
-      if (inGuild) {
-        await supabase.from("servers").upsert(
-          { guild_id: id, bot_added: true, bumped_at: new Date().toISOString() },
-          { onConflict: "guild_id" }
-        );
-        confirmed.add(id);
-      }
-    })
-  );
-
-  return NextResponse.json([...confirmed]);
+  return NextResponse.json(matched);
 }
