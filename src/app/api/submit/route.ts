@@ -4,7 +4,7 @@ import { createAdminClient } from "@/lib/supabase-admin";
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
-    const { guild_id, description, tags, nsfw } = body;
+    const { guild_id, name, icon_url, member_count, description, tags, nsfw } = body;
 
     if (!guild_id || !description) {
       return NextResponse.json({ error: "필수 항목을 입력해주세요." }, { status: 400 });
@@ -19,6 +19,9 @@ export async function POST(req: NextRequest) {
       .from("servers")
       .upsert({
         guild_id,
+        name: name ?? "",
+        icon_url: icon_url ?? null,
+        member_count: member_count ?? 0,
         description,
         tags: tags ?? [],
         nsfw: nsfw ?? false,

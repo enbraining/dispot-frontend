@@ -140,6 +140,9 @@ function SubmitForm() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           guild_id: selectedGuild.id,
+          name: selectedGuild.name,
+          icon_url: selectedGuild.icon,
+          member_count: selectedGuild.approximate_member_count,
           description: form.description,
           tags: form.tags,
           nsfw: form.nsfw,
