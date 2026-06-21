@@ -72,7 +72,7 @@ export default function Header() {
           DISPOT
         </Link>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 h-8">
           <button
             onClick={toggleDark}
             className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
@@ -82,7 +82,7 @@ export default function Header() {
 
           <Link
             href={loggedIn ? "/submit" : "/api/auth/discord"}
-            className="flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-medium leading-none bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
           >
             <IconPlus size={13} stroke={2} />
             서버 등록
@@ -92,7 +92,7 @@ export default function Header() {
             <div ref={profileRef} className="relative">
               <button
                 onClick={() => setProfileOpen((v) => !v)}
-                className="w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-all flex-shrink-0"
+                className="w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-all flex-shrink-0 flex items-center justify-center"
               >
                 {avatar ? (
                   <Image src={avatar} alt="프로필" width={32} height={32} className="w-full h-full object-cover" />
