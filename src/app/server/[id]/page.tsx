@@ -40,7 +40,7 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
             <div className="flex gap-2">
               <BumpButton serverId={server.id} bumpCount={server.bump_count} />
               <a
-                href={server.invite_url}
+                href={server.invite_url ?? undefined}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"

@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase-server";
 
 export async function GET(req: NextRequest) {
   const code = req.nextUrl.searchParams.get("code");
@@ -7,7 +8,6 @@ export async function GET(req: NextRequest) {
   }
 
   try {
-    // code → access token
     const tokenRes = await fetch("https://discord.com/api/oauth2/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -22,6 +22,27 @@ export async function GET(req: NextRequest) {
     const token = await tokenRes.json();
     if (!token.access_token) throw new Error("token exchange failed");
 
+    // 봇이 추가된 길드 (bot 스코프 사용 시 token.guild 포함)
+    const botGuild: BotGuild | null = token.guild ?? null;
+
+    // 봇이 추가된 서버가 있으면 DB에 bot_added = true로 upsert
+    if (botGuild) {
+      const supabase = await createClient();
+      const icon = botGuild.icon
+        ? `https://cdn.discordapp.com/icons/${botGuild.id}/${botGuild.icon}.png`
+        : null;
+
+      await supabase.from("servers")
+        .upsert({
+          guild_id: botGuild.id,
+          name: botGuild.name,
+          icon_url: icon,
+          bot_added: true,
+          bumped_at: new Date().toISOString(),
+        }, { onConflict: "guild_id", ignoreDuplicates: false })
+        .select();
+    }
+
     // 관리자 권한 있는 길드 목록 (approximate_member_count 포함)
     const guildsRes = await fetch(
       "https://discord.com/api/users/@me/guilds?with_counts=true",
@@ -29,20 +50,16 @@ export async function GET(req: NextRequest) {
     );
     const guilds: DiscordGuild[] = await guildsRes.json();
 
-    // MANAGE_GUILD(0x20) 권한 있는 서버만
     const MANAGE_GUILD = 0x20;
     const managed = guilds
       .filter((g) => (Number(g.permissions) & MANAGE_GUILD) === MANAGE_GUILD)
       .map((g) => ({
         id: g.id,
         name: g.name,
-        icon: g.icon
-          ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png`
-          : null,
+        icon: g.icon ? `https://cdn.discordapp.com/icons/${g.id}/${g.icon}.png` : null,
         approximate_member_count: g.approximate_member_count ?? 0,
       }));
 
-    // 서버 목록을 URL 파라미터로 전달 (짧은 리스트이므로 base64 인코딩)
     const encoded = Buffer.from(JSON.stringify(managed)).toString("base64url");
     return NextResponse.redirect(
       `${process.env.NEXT_PUBLIC_BASE_URL}/submit?guilds=${encoded}`
@@ -61,4 +78,10 @@ interface DiscordGuild {
   icon: string | null;
   permissions: string;
   approximate_member_count?: number;
+}
+
+interface BotGuild {
+  id: string;
+  name: string;
+  icon: string | null;
 }

@@ -4,9 +4,10 @@ import { createClient } from "./supabase-server";
 
 export interface Server {
   id: string;
+  guild_id: string | null;
   name: string;
   description: string;
-  invite_url: string;
+  invite_url: string | null;
   icon_url: string | null;
   tags: string[];
   member_count: number;
@@ -15,6 +16,7 @@ export interface Server {
   created_at: string;
   owner_id: string | null;
   nsfw: boolean;
+  bot_added: boolean;
 }
 
 export async function getServers({
@@ -31,7 +33,10 @@ export async function getServers({
   limit?: number;
 } = {}): Promise<{ servers: Server[]; total: number }> {
   const supabase = await createClient();
-  let q = supabase.from("servers").select("*", { count: "exact" });
+  let q = supabase
+    .from("servers")
+    .select("*", { count: "exact" })
+    .eq("bot_added", true); // 봇이 추가된 서버만
 
   if (tag) q = q.contains("tags", [tag]);
   if (search) q = q.ilike("name", `%${search}%`);

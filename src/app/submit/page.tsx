@@ -31,11 +31,8 @@ function SubmitForm() {
   const pickerRef = useRef<HTMLDivElement>(null);
 
   const [form, setForm] = useState({
-    name: "",
     description: "",
-    invite_url: "",
     tags: [] as string[],
-    member_count: "",
     nsfw: false,
   });
   const [tagInput, setTagInput] = useState("");
@@ -84,7 +81,6 @@ function SubmitForm() {
   function applyGuild(guild: DiscordGuild) {
     setSelectedGuild(guild);
     setGuildPickerOpen(false);
-    setForm((f) => ({ ...f, name: guild.name, member_count: String(guild.approximate_member_count) }));
   }
 
   function set(key: string, val: string | boolean | string[]) {
@@ -96,14 +92,15 @@ function SubmitForm() {
     setLoading(true);
     setError("");
     try {
+      if (!selectedGuild) { setError("서버를 선택해주세요."); setLoading(false); return; }
       const res = await fetch("/api/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...form,
-          icon_url: selectedGuild?.icon ?? null,
+          guild_id: selectedGuild.id,
+          description: form.description,
           tags: form.tags,
-          member_count: Number(form.member_count) || 0,
+          nsfw: form.nsfw,
         }),
       });
       const data = await res.json();
@@ -211,18 +208,8 @@ function SubmitForm() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>서버 이름 *</label>
-          <input value={form.name} onChange={(e) => set("name", e.target.value)} required placeholder="서버 이름" className={inputClass} />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
           <label className={labelClass}>소개 *</label>
           <textarea value={form.description} onChange={(e) => set("description", e.target.value)} required placeholder="서버를 소개해주세요." rows={4} className={inputClass + " resize-none"} />
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>초대 링크 *</label>
-          <input value={form.invite_url} onChange={(e) => set("invite_url", e.target.value)} required placeholder="https://discord.gg/..." type="url" className={inputClass} />
         </div>
 
         <div className="flex flex-col gap-1.5">
@@ -263,11 +250,6 @@ function SubmitForm() {
             />
           </div>
           <p className="text-xs text-gray-400">최대 10개 · Backspace로 마지막 태그 삭제</p>
-        </div>
-
-        <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>멤버 수</label>
-          <input value={form.member_count} onChange={(e) => set("member_count", e.target.value)} type="number" min="0" placeholder="0" className={inputClass} />
         </div>
 
         <label className="flex items-center gap-2.5 cursor-pointer">
