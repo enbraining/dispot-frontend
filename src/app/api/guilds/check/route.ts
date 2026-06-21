@@ -39,15 +39,6 @@ export async function POST(req: NextRequest) {
 
   const existingMap = new Map((existing ?? []).map((r) => [r.guild_id, r.description]));
 
-  // 봇 있지만 DB에 없는 서버 → 신규 upsert
-  const newGuilds = matched.filter((id) => !existingMap.has(id));
-  if (newGuilds.length > 0) {
-    await supabase.from("servers").upsert(
-      newGuilds.map((id) => ({ guild_id: id, bot_added: true, bumped_at: new Date().toISOString() })),
-      { onConflict: "guild_id" }
-    );
-  }
-
   const available: string[] = [];
   const registered: string[] = [];
 

@@ -25,6 +25,7 @@ export async function POST(req: NextRequest) {
         description,
         tags: tags ?? [],
         nsfw: nsfw ?? false,
+        bot_added: true,
       }, { onConflict: "guild_id" })
       .select()
       .single();
