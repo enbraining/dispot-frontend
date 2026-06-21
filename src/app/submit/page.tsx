@@ -2,7 +2,7 @@
 
 import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { IconArrowLeft, IconBrandDiscord, IconChevronDown, IconX, IconExternalLink } from "@tabler/icons-react";
+import { IconArrowLeft, IconChevronDown, IconX, IconExternalLink } from "@tabler/icons-react";
 import Link from "next/link";
 import Image from "next/image";
 
@@ -122,34 +122,10 @@ function SubmitForm() {
   // 로드 전
   if (guilds === null) return null;
 
-  // 미로그인
+  // 미로그인 → Discord OAuth로 바로 이동
   if (guilds.length === 0) {
-    return (
-      <div className="max-w-lg mx-auto flex flex-col gap-6">
-        <Link href="/" className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-gray-700 dark:hover:text-zinc-300 transition-colors w-fit">
-          <IconArrowLeft size={15} stroke={1.5} />
-          목록으로
-        </Link>
-
-        <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-8 flex flex-col items-center gap-5 text-center">
-          <div className="w-14 h-14 rounded-2xl bg-[#5865F2]/10 flex items-center justify-center">
-            <IconBrandDiscord size={28} className="text-[#5865F2]" stroke={1.5} />
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <h2 className="text-base font-bold text-gray-900 dark:text-white">Discord 로그인이 필요합니다</h2>
-            <p className="text-sm text-gray-500 dark:text-zinc-400">서버를 등록하려면 Discord 계정으로 로그인하세요.</p>
-          </div>
-          {error && <p className="text-xs text-red-500">{error}</p>}
-          <a
-            href="/api/auth/discord"
-            className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#5865F2] hover:bg-[#4752c4] text-white text-sm font-semibold transition-colors"
-          >
-            <IconBrandDiscord size={16} stroke={1.5} />
-            Discord로 로그인
-          </a>
-        </div>
-      </div>
-    );
+    router.replace("/api/auth/discord");
+    return null;
   }
 
   return (
