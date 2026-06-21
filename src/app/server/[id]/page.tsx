@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
-import { IconUsers, IconArrowLeft, IconArrowUp, IconExternalLink } from "@tabler/icons-react";
+import { IconUsers, IconArrowLeft, IconClock, IconExternalLink } from "@tabler/icons-react";
 import ServerActions from "./ServerActions";
 
 export default async function ServerPage({ params }: { params: Promise<{ id: string }> }) {
@@ -38,8 +38,8 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
                 {server.member_count.toLocaleString()}명
               </span>
               <span className="flex items-center gap-1">
-                <IconArrowUp size={12} stroke={1.5} />
-                {server.bump_count.toLocaleString()} · {bumped}
+                <IconClock size={12} stroke={1.5} />
+                범프 {bumped}
               </span>
             </div>
           </div>

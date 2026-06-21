@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
-import { IconUsers, IconArrowUp } from "@tabler/icons-react";
+import { IconUsers, IconClock } from "@tabler/icons-react";
 import type { Server } from "@/lib/db";
 
 export default function ServerCard({ server }: { server: Server }) {
@@ -55,7 +55,7 @@ export default function ServerCard({ server }: { server: Server }) {
             {server.member_count.toLocaleString()}명
           </span>
           <span className="flex items-center gap-1">
-            <IconArrowUp size={12} stroke={1.5} />
+            <IconClock size={12} stroke={1.5} />
             {bumped}
           </span>
         </div>

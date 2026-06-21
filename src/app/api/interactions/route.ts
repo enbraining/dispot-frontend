@@ -46,7 +46,7 @@ async function handleBump(guildId: string) {
   const supabase = createAdminClient();
   const { data: server } = await supabase
     .from("servers")
-    .select("id, bumped_at, bump_count, bot_added")
+    .select("id, bumped_at, bot_added")
     .eq("guild_id", guildId)
     .single();
 
@@ -54,7 +54,7 @@ async function handleBump(guildId: string) {
     return msg("DISPOT에 등록되지 않은 서버입니다. `/register`로 초대 채널을 먼저 설정해주세요.", true);
   }
 
-  const cooldown = 2 * 60 * 60 * 1000;
+  const cooldown = 30 * 60 * 1000; // 30분
   const remaining = cooldown - (Date.now() - new Date(server.bumped_at).getTime());
   if (remaining > 0) {
     const mins = Math.ceil(remaining / 60000);
@@ -63,7 +63,7 @@ async function handleBump(guildId: string) {
 
   await supabase
     .from("servers")
-    .update({ bump_count: server.bump_count + 1, bumped_at: new Date().toISOString() })
+    .update({ bumped_at: new Date().toISOString() })
     .eq("id", server.id);
 
   return msg("✅ 서버가 DISPOT 상단으로 올라갔습니다!");

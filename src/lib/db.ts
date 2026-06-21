@@ -11,7 +11,6 @@ export interface Server {
   icon_url: string | null;
   tags: string[];
   member_count: number;
-  bump_count: number;
   bumped_at: string;
   created_at: string;
   owner_id: string | null;
@@ -61,7 +60,3 @@ export async function getServer(id: string): Promise<Server | null> {
   return data as Server | null;
 }
 
-export async function bumpServer(id: string) {
-  const supabase = await createClient();
-  await supabase.rpc("bump_server", { server_id: id });
-}

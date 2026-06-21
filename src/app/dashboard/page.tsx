@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Image from "next/image";
-import { IconArrowLeft, IconArrowUp, IconPencil, IconPlus, IconUsers, IconTrash } from "@tabler/icons-react";
+import { IconArrowLeft, IconClock, IconPencil, IconPlus, IconUsers, IconTrash } from "@tabler/icons-react";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
 import type { Server } from "@/lib/db";
@@ -89,7 +89,7 @@ function DashboardCard({ server, onDelete }: { server: Server; onDelete: (id: st
         <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{server.name}</p>
         <div className="flex items-center gap-3 text-xs text-gray-400 dark:text-zinc-500">
           <span className="flex items-center gap-1"><IconUsers size={11} stroke={1.5} />{server.member_count.toLocaleString()}명</span>
-          <span className="flex items-center gap-1"><IconArrowUp size={11} stroke={1.5} />{server.bump_count.toLocaleString()} · {bumped}</span>
+          <span className="flex items-center gap-1"><IconClock size={11} stroke={1.5} />범프 {bumped}</span>
           {!server.bot_added && <span className="text-amber-500">봇 미추가</span>}
           {server.bot_added && !server.invite_url && <span className="text-amber-500">/register 필요</span>}
         </div>
