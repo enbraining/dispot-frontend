@@ -65,7 +65,7 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
-        <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed break-words overflow-hidden">
+        <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed break-words overflow-hidden whitespace-pre-line">
           {server.description}
         </p>
 
