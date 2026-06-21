@@ -67,9 +67,21 @@ async function handleBump(guildId: string) {
     return msg(`⏳ 쿨다운 중입니다. **${mins}분** 후에 다시 시도해주세요.`, true);
   }
 
+  // 현재 멤버/온라인 수 갱신
+  const guildRes = await fetch(`https://discord.com/api/v10/guilds/${guildId}?with_counts=true`, {
+    headers: { Authorization: `Bot ${BOT_TOKEN}` },
+  });
+  const guildData = guildRes.ok ? await guildRes.json() : null;
+
   await supabase
     .from("servers")
-    .update({ bumped_at: new Date().toISOString() })
+    .update({
+      bumped_at: new Date().toISOString(),
+      ...(guildData && {
+        member_count: guildData.approximate_member_count ?? 0,
+        online_count: guildData.approximate_presence_count ?? 0,
+      }),
+    })
     .eq("id", server.id);
 
   return msg("✅ 서버가 DISPOT 상단으로 올라갔습니다!");

@@ -43,6 +43,12 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
                 <IconUsers size={12} stroke={1.5} />
                 {server.member_count.toLocaleString()}명
               </span>
+              {server.online_count > 0 && (
+                <span className="flex items-center gap-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-400 inline-block" />
+                  {server.online_count.toLocaleString()} 온라인
+                </span>
+              )}
               <span className="flex items-center gap-1">
                 <IconClock size={12} stroke={1.5} />
                 범프 {bumped}

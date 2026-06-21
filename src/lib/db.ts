@@ -11,6 +11,7 @@ export interface Server {
   icon_url: string | null;
   tags: string[];
   member_count: number;
+  online_count: number;
   bumped_at: string;
   created_at: string;
   owner_id: string | null;
