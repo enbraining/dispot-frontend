@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { IconSun, IconMoon, IconPlus, IconBrandDiscord, IconLogout } from "@tabler/icons-react";
 import Image from "next/image";
 
-const SESSION_KEY = "dischan_guilds";
-const USER_KEY = "dischan_user";
+const SESSION_KEY = "dispot_guilds";
+const USER_KEY = "dispot_user";
 
 export default function Header() {
   const [dark, setDark] = useState(false);
@@ -64,7 +64,7 @@ export default function Header() {
     <header className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800 sticky top-0 z-10">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
         <Link href="/" className="text-base font-bold tracking-widest text-gray-900 dark:text-white select-none" style={{ fontFamily: "var(--font-space-mono)" }}>
-          DISCHAN
+          DISPOT
         </Link>
 
         <div className="flex items-center gap-2">

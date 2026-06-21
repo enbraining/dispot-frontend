@@ -13,8 +13,15 @@ interface DiscordGuild {
   approximate_member_count: number;
 }
 
-const SESSION_KEY = "dischan_guilds";
-const USER_KEY = "dischan_user";
+const SESSION_KEY = "dispot_guilds";
+const USER_KEY = "dispot_user";
+
+// atob은 Latin-1만 처리 → TextDecoder로 UTF-8 디코딩
+function decodeBase64(encoded: string): string {
+  const binary = atob(encoded.replace(/-/g, "+").replace(/_/g, "/"));
+  const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
 
 function botInviteUrl() {
   const clientId = process.env.NEXT_PUBLIC_DISCORD_CLIENT_ID;
@@ -49,12 +56,12 @@ function SubmitForm() {
     const encoded = searchParams.get("guilds");
     if (encoded) {
       try {
-        const data: DiscordGuild[] = JSON.parse(atob(encoded.replace(/-/g, "+").replace(/_/g, "/")));
+        const data: DiscordGuild[] = JSON.parse(decodeBase64(encoded));
         sessionStorage.setItem(SESSION_KEY, JSON.stringify(data));
         setGuilds(data);
         const encodedUser = searchParams.get("user");
         if (encodedUser) {
-          const userData = JSON.parse(atob(encodedUser.replace(/-/g, "+").replace(/_/g, "/")));
+          const userData = JSON.parse(decodeBase64(encodedUser));
           sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
         }
         router.replace("/submit");
@@ -139,7 +146,7 @@ function SubmitForm() {
 
       <div className="flex flex-col gap-1">
         <h1 className="text-xl font-bold text-gray-900 dark:text-white">서버 등록</h1>
-        <p className="text-sm text-gray-500 dark:text-zinc-400">디스코드 서버를 DISCHAN에 등록하세요.</p>
+        <p className="text-sm text-gray-500 dark:text-zinc-400">디스코드 서버를 DISPOT에 등록하세요.</p>
       </div>
 
       <form onSubmit={handleSubmit} className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-6 flex flex-col gap-5">

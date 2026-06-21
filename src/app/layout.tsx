@@ -21,7 +21,7 @@ const spaceMono = localFont({
 });
 
 export const metadata: Metadata = {
-  title: "DISCHAN — 디스코드 서버 찾기",
+  title: "DISPOT — 디스코드 서버 찾기",
   description: "한국 디스코드 서버를 찾고 등록하세요.",
 };
 
