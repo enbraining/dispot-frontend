@@ -255,7 +255,10 @@ function SubmitForm() {
 
         <div className="flex flex-col gap-1.5">
           <label className={labelClass}>소개 *</label>
-          <textarea value={form.description} onChange={(e) => set("description", e.target.value)} required placeholder="서버를 소개해주세요." rows={4} className={inputClass + " resize-none"} />
+          <textarea value={form.description} onChange={(e) => set("description", e.target.value)} required minLength={50} placeholder="서버를 소개해주세요. (최소 50자)" rows={4} className={inputClass + " resize-none"} />
+          <p className={`text-xs ${form.description.length < 50 ? "text-gray-400" : "text-indigo-500"}`}>
+            {form.description.length} / 50자 이상
+          </p>
         </div>
 
         <div className="flex flex-col gap-1.5">

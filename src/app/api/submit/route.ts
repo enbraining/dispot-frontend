@@ -9,6 +9,9 @@ export async function POST(req: NextRequest) {
     if (!guild_id || !description) {
       return NextResponse.json({ error: "필수 항목을 입력해주세요." }, { status: 400 });
     }
+    if (description.length < 50) {
+      return NextResponse.json({ error: "소개는 50자 이상 입력해주세요." }, { status: 400 });
+    }
 
     const supabase = await createClient();
 
