@@ -15,7 +15,6 @@ export async function POST(req: NextRequest) {
 
     const supabase = await createClient();
 
-    // 기존 서버가 있으면 description/tags/nsfw만 업데이트
     const { data, error } = await supabase
       .from("servers")
       .upsert({
@@ -27,9 +26,14 @@ export async function POST(req: NextRequest) {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error("[submit] supabase error:", error);
+      return NextResponse.json({ error: error.message }, { status: 500 });
+    }
     return NextResponse.json({ id: data.id });
   } catch (e) {
-    return NextResponse.json({ error: String(e) }, { status: 500 });
+    const msg = e instanceof Error ? e.message : JSON.stringify(e);
+    console.error("[submit] error:", msg);
+    return NextResponse.json({ error: msg }, { status: 500 });
   }
 }
