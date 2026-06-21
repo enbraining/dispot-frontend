@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase-server";
+import { createAdminClient } from "@/lib/supabase-admin";
 
 // 봇이 참여 중인 서버 ID 목록
 async function getBotGuildIds(): Promise<Set<string>> {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
 
   // bot_added 동기화
   if (matched.length > 0) {
-    const supabase = await createClient();
+    const supabase = createAdminClient();
     await supabase.from("servers").upsert(
       matched.map((id) => ({ guild_id: id, bot_added: true, bumped_at: new Date().toISOString() })),
       { onConflict: "guild_id" }
