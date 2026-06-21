@@ -28,6 +28,7 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
       </Suspense>
 
       <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-6 flex flex-col gap-4">
+        {/* 아이콘 + 제목 + 버튼 */}
         <div className="flex items-center gap-4">
           <div className="w-16 h-16 rounded-xl bg-indigo-100 dark:bg-indigo-900 overflow-hidden flex-shrink-0 flex items-center justify-center">
             {server.icon_url ? (
@@ -38,6 +39,8 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
           </div>
           <div className="flex-1 min-w-0">
             <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight break-words">{server.name}</h1>
+
+            {/* 통계 줄 — 모바일: 수정 버튼 우측에 */}
             <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-zinc-500">
               <span className="flex items-center gap-1">
                 <IconUsers size={12} stroke={1.5} />
@@ -53,10 +56,20 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
                 <IconClock size={12} stroke={1.5} />
                 범프 {bumped}
               </span>
+              {/* 모바일 전용 수정 버튼 */}
+              <div className="sm:hidden ml-auto">
+                <Suspense>
+                  <ServerActions serverId={server.id} guildId={server.guild_id} compact />
+                </Suspense>
+              </div>
             </div>
           </div>
-          <div className="flex gap-2 flex-shrink-0">
-            <ServerActions serverId={server.id} guildId={server.guild_id} />
+
+          {/* 데스크탑 전용 버튼 */}
+          <div className="hidden sm:flex gap-2 flex-shrink-0">
+            <Suspense>
+              <ServerActions serverId={server.id} guildId={server.guild_id} />
+            </Suspense>
             {server.invite_url && (
               <a
                 href={server.invite_url}
@@ -71,9 +84,23 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
           </div>
         </div>
 
+        {/* 설명 */}
         <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed break-words overflow-hidden whitespace-pre-line">
           {server.description}
         </p>
+
+        {/* 모바일 전용 참가하기 버튼 */}
+        {server.invite_url && (
+          <a
+            href={server.invite_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="sm:hidden flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
+          >
+            <IconExternalLink size={15} stroke={2} />
+            참가하기
+          </a>
+        )}
 
         {server.tags.length > 0 && (
           <div className="flex flex-wrap gap-1.5">

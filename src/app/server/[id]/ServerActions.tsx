@@ -6,7 +6,7 @@ import { IconPencil } from "@tabler/icons-react";
 
 const SESSION_KEY = "dispot_guilds";
 
-export default function ServerActions({ serverId, guildId }: { serverId: string; guildId: string | null }) {
+export default function ServerActions({ serverId, guildId, compact = false }: { serverId: string; guildId: string | null; compact?: boolean }) {
   const [isOwner, setIsOwner] = useState(false);
 
   useEffect(() => {
@@ -17,6 +17,18 @@ export default function ServerActions({ serverId, guildId }: { serverId: string;
   }, [guildId]);
 
   if (!isOwner) return null;
+
+  if (compact) {
+    return (
+      <Link
+        href={`/server/${serverId}/edit`}
+        className="flex items-center gap-1 text-xs text-gray-400 dark:text-zinc-500 hover:text-indigo-500 transition-colors"
+      >
+        <IconPencil size={11} stroke={1.5} />
+        수정
+      </Link>
+    );
+  }
 
   return (
     <Link
