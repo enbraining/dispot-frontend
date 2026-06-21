@@ -154,14 +154,13 @@ function SubmitForm() {
   const inputClass = "w-full px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500 transition-colors";
   const labelClass = "text-xs font-medium text-gray-600 dark:text-zinc-400";
 
-  // 로드 전
-  if (guilds === null) return null;
+  useEffect(() => {
+    if (guilds !== null && guilds.length === 0) {
+      router.replace("/api/auth/discord");
+    }
+  }, [guilds]);
 
-  // 미로그인 → Discord OAuth로 바로 이동
-  if (guilds.length === 0) {
-    router.replace("/api/auth/discord");
-    return null;
-  }
+  if (guilds === null || guilds.length === 0) return null;
 
   return (
     <div className="max-w-lg mx-auto flex flex-col gap-6">
