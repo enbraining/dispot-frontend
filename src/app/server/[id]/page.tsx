@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
-import { IconUsers, IconArrowLeft, IconArrowUp, IconExternalLink } from "@tabler/icons-react";
+import { IconUsers, IconArrowLeft, IconArrowUp, IconExternalLink, IconPencil } from "@tabler/icons-react";
 import BumpButton from "./BumpButton";
 
 export default async function ServerPage({ params }: { params: Promise<{ id: string }> }) {
@@ -45,6 +45,10 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
             </div>
           </div>
           <div className="flex gap-2 flex-shrink-0">
+            <Link href={`/server/${server.id}/edit`} className="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 text-sm text-gray-600 dark:text-zinc-400 hover:border-gray-300 dark:hover:border-zinc-600 transition-colors">
+              <IconPencil size={14} stroke={1.5} />
+              수정
+            </Link>
             <BumpButton serverId={server.id} bumpCount={server.bump_count} />
             {server.invite_url && (
               <a
