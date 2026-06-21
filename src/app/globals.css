@@ -1,16 +1,1 @@
 @import "tailwindcss";
-
-@font-face {
-  font-family: "Space Mono";
-  font-weight: 700;
-  font-display: swap;
-  src: url("/SpaceMono-Bold.woff2") format("woff2");
-}
-
-:root {
-  --font-space-mono: "Space Mono", monospace;
-}
-
-@theme inline {
-  --font-space-mono: var(--font-space-mono);
-}

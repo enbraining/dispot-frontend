@@ -1,6 +1,24 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import "./globals.css";
 import Header from "@/components/Header";
+
+const pretendard = localFont({
+  src: [
+    { path: "../../public/fonts/Pretendard-Regular.woff2", weight: "400" },
+    { path: "../../public/fonts/Pretendard-Medium.woff2", weight: "500" },
+    { path: "../../public/fonts/Pretendard-SemiBold.woff2", weight: "600" },
+    { path: "../../public/fonts/Pretendard-Bold.woff2", weight: "700" },
+  ],
+  variable: "--font-pretendard",
+  display: "swap",
+});
+
+const spaceMono = localFont({
+  src: [{ path: "../../public/SpaceMono-Bold.woff2", weight: "700" }],
+  variable: "--font-space-mono",
+  display: "swap",
+});
 
 export const metadata: Metadata = {
   title: "DISCHAN — 디스코드 서버 찾기",
@@ -9,8 +27,11 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="ko" suppressHydrationWarning>
-      <body className="bg-gray-50 dark:bg-zinc-950 min-h-screen text-gray-900 dark:text-white antialiased">
+    <html lang="ko" suppressHydrationWarning className={`${pretendard.variable} ${spaceMono.variable}`}>
+      <body
+        className="bg-gray-50 dark:bg-zinc-950 min-h-screen text-gray-900 dark:text-white antialiased"
+        style={{ fontFamily: "var(--font-pretendard), sans-serif" }}
+      >
         <Header />
         <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
           {children}
