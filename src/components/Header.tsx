@@ -67,22 +67,22 @@ export default function Header() {
 
   return (
     <header className="bg-white/80 dark:bg-zinc-950/80 backdrop-blur-md border-b border-gray-100 dark:border-zinc-800 sticky top-0 z-10">
-      <div className="max-w-6xl mx-auto px-4 sm:px-6 py-3 flex items-center justify-between">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-4 flex items-center justify-between">
         <Link href="/" className="text-base font-bold tracking-widest text-gray-900 dark:text-white select-none" style={{ fontFamily: "var(--font-space-mono)" }}>
           DISPOT
         </Link>
 
-        <div className="flex items-center gap-2 h-8">
+        <div className="flex items-center gap-2.5 h-9">
           <button
             onClick={toggleDark}
-            className="w-8 h-8 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+            className="w-9 h-9 flex items-center justify-center rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
           >
             {dark ? <IconSun size={16} stroke={1.5} /> : <IconMoon size={16} stroke={1.5} />}
           </button>
 
           <Link
             href={loggedIn ? "/submit" : "/api/auth/discord"}
-            className="flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-medium leading-none bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-1.5 px-4 h-9 rounded-full text-sm font-medium leading-none bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
           >
             <IconPlus size={13} stroke={2} />
             서버 등록
@@ -92,10 +92,10 @@ export default function Header() {
             <div ref={profileRef} className="relative">
               <button
                 onClick={() => setProfileOpen((v) => !v)}
-                className="w-8 h-8 rounded-full overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-all flex-shrink-0 flex items-center justify-center"
+                className="w-9 h-9 rounded-full overflow-hidden hover:ring-2 hover:ring-indigo-400 transition-all flex-shrink-0 flex items-center justify-center"
               >
                 {avatar ? (
-                  <Image src={avatar} alt="프로필" width={32} height={32} className="w-full h-full object-cover" />
+                  <Image src={avatar} alt="프로필" width={36} height={36} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-[#5865F2] flex items-center justify-center">
                     <IconBrandDiscord size={14} className="text-white" stroke={1.5} />
@@ -118,7 +118,7 @@ export default function Header() {
           ) : (
             <a
               href="/api/auth/discord"
-              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-medium text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
+              className="flex items-center gap-1.5 px-3 h-9 rounded-lg text-sm font-medium text-gray-500 dark:text-zinc-400 hover:bg-gray-100 dark:hover:bg-zinc-800 transition-colors"
             >
               <IconBrandDiscord size={14} stroke={1.5} />
               로그인

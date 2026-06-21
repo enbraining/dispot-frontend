@@ -33,7 +33,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
         style={{ fontFamily: "var(--font-pretendard), sans-serif" }}
       >
         <Header />
-        <main className="max-w-6xl mx-auto px-4 sm:px-6 py-8">
+        <main className="max-w-6xl mx-auto px-5 sm:px-8 py-10">
           {children}
         </main>
       </body>

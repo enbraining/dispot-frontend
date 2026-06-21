@@ -13,12 +13,12 @@ export default function ServerCard({ server }: { server: Server }) {
   return (
     <Link
       href={`/server/${server.id}`}
-      className="group flex flex-col gap-3 p-4 bg-white dark:bg-zinc-900 rounded-xl border border-gray-100 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-md transition-all"
+      className="group flex flex-col gap-3.5 p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-md transition-all"
     >
       {/* 로고 */}
-      <div className="w-12 h-12 rounded-xl bg-indigo-100 dark:bg-indigo-900 overflow-hidden flex-shrink-0 flex items-center justify-center">
+      <div className="w-14 h-14 rounded-xl bg-indigo-100 dark:bg-indigo-900 overflow-hidden flex-shrink-0 flex items-center justify-center">
         {server.icon_url ? (
-          <Image src={server.icon_url} alt={server.name} width={48} height={48} className="object-cover w-full h-full" />
+          <Image src={server.icon_url} alt={server.name} width={56} height={56} className="object-cover w-full h-full" />
         ) : (
           <span className="text-lg font-bold text-indigo-500 dark:text-indigo-300 select-none">
             {server.name[0]}
@@ -27,12 +27,12 @@ export default function ServerCard({ server }: { server: Server }) {
       </div>
 
       {/* 제목 */}
-      <h2 className="text-sm font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 leading-snug line-clamp-1">
+      <h2 className="text-base font-bold text-gray-900 dark:text-white group-hover:text-indigo-600 dark:group-hover:text-indigo-400 leading-snug line-clamp-1">
         {server.name}
       </h2>
 
       {/* 설명 */}
-      <p className="text-xs text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed flex-1">
+      <p className="text-sm text-gray-500 dark:text-zinc-400 line-clamp-2 leading-relaxed flex-1">
         {server.description}
       </p>
 
