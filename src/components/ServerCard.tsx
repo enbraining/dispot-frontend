@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
-import { IconUsers, IconClock } from "@tabler/icons-react";
+import { IconUsers, IconClock, IconArrowRight } from "@tabler/icons-react";
 import type { Server } from "@/lib/db";
 
 export default function ServerCard({ server }: { server: Server }) {
@@ -77,7 +77,7 @@ export default function ServerCard({ server }: { server: Server }) {
             onClick={(e) => e.stopPropagation()}
             className="px-2.5 py-1 rounded-full bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition-colors"
           >
-            참여하기
+            참여하기 <IconArrowRight size={10} stroke={2.5} className="inline" />
           </a>
         )}
       </div>
