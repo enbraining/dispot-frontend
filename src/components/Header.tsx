@@ -82,7 +82,7 @@ export default function Header() {
 
           <Link
             href={loggedIn ? "/submit" : "/api/auth/discord"}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-1.5 px-3 h-8 rounded-full text-xs font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
           >
             <IconPlus size={13} stroke={2} />
             서버 등록

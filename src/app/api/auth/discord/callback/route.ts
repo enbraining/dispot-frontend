@@ -22,26 +22,6 @@ export async function GET(req: NextRequest) {
     const token = await tokenRes.json();
     if (!token.access_token) throw new Error("token exchange failed");
 
-    // 봇이 추가된 길드 (bot 스코프 사용 시 token.guild 포함)
-    const botGuild: BotGuild | null = token.guild ?? null;
-
-    if (botGuild) {
-      const supabase = await createClient();
-      const icon = botGuild.icon
-        ? `https://cdn.discordapp.com/icons/${botGuild.id}/${botGuild.icon}.png`
-        : null;
-
-      await supabase.from("servers")
-        .upsert({
-          guild_id: botGuild.id,
-          name: botGuild.name,
-          icon_url: icon,
-          bot_added: true,
-          bumped_at: new Date().toISOString(),
-        }, { onConflict: "guild_id", ignoreDuplicates: false })
-        .select();
-    }
-
     // 유저 프로필 + 관리 길드 목록 병렬 fetch
     const [userRes, guildsRes] = await Promise.all([
       fetch("https://discord.com/api/users/@me", {
@@ -98,8 +78,3 @@ interface DiscordGuild {
   approximate_member_count?: number;
 }
 
-interface BotGuild {
-  id: string;
-  name: string;
-  icon: string | null;
-}
