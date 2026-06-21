@@ -4,7 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { formatDistanceToNow } from "date-fns";
 import { ko } from "date-fns/locale";
-import { IconUsers, IconArrowLeft, IconExternalLink } from "@tabler/icons-react";
+import { IconUsers, IconArrowLeft, IconArrowUp, IconExternalLink } from "@tabler/icons-react";
 import BumpButton from "./BumpButton";
 
 export default async function ServerPage({ params }: { params: Promise<{ id: string }> }) {
@@ -21,26 +21,34 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
         목록으로
       </Link>
 
-      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 overflow-hidden">
-        {/* Banner */}
-        <div className="h-32 bg-gradient-to-br from-indigo-400 to-violet-600 relative" />
-
-        <div className="px-6 pb-6">
-          {/* Icon */}
-          <div className="w-20 h-20 rounded-2xl border-4 border-white dark:border-zinc-900 bg-indigo-100 dark:bg-indigo-900 overflow-hidden -mt-10 mb-4 flex items-center justify-center shadow-md">
+      <div className="bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 p-6 flex flex-col gap-4">
+        {/* 로고 + 제목 + 버튼 */}
+        <div className="flex items-center gap-4">
+          <div className="w-16 h-16 rounded-xl bg-indigo-100 dark:bg-indigo-900 overflow-hidden flex-shrink-0 flex items-center justify-center">
             {server.icon_url ? (
-              <Image src={server.icon_url} alt={server.name} width={80} height={80} className="object-cover w-full h-full" />
+              <Image src={server.icon_url} alt={server.name} width={64} height={64} className="object-cover w-full h-full" />
             ) : (
-              <span className="text-3xl font-bold text-indigo-500 dark:text-indigo-300 select-none">{server.name[0]}</span>
+              <span className="text-2xl font-bold text-indigo-500 dark:text-indigo-300 select-none">{server.name[0]}</span>
             )}
           </div>
-
-          <div className="flex items-start justify-between gap-4 flex-wrap">
-            <h1 className="text-xl font-bold text-gray-900 dark:text-white">{server.name}</h1>
-            <div className="flex gap-2">
-              <BumpButton serverId={server.id} bumpCount={server.bump_count} />
+          <div className="flex-1 min-w-0">
+            <h1 className="text-xl font-bold text-gray-900 dark:text-white leading-tight">{server.name}</h1>
+            <div className="flex items-center gap-3 mt-1 text-xs text-gray-400 dark:text-zinc-500">
+              <span className="flex items-center gap-1">
+                <IconUsers size={12} stroke={1.5} />
+                {server.member_count.toLocaleString()}명
+              </span>
+              <span className="flex items-center gap-1">
+                <IconArrowUp size={12} stroke={1.5} />
+                {server.bump_count.toLocaleString()} · {bumped}
+              </span>
+            </div>
+          </div>
+          <div className="flex gap-2 flex-shrink-0">
+            <BumpButton serverId={server.id} bumpCount={server.bump_count} />
+            {server.invite_url && (
               <a
-                href={server.invite_url ?? undefined}
+                href={server.invite_url}
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-indigo-600 text-white text-sm font-semibold hover:bg-indigo-700 transition-colors"
@@ -48,38 +56,25 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
                 <IconExternalLink size={14} stroke={2} />
                 참가하기
               </a>
-            </div>
-          </div>
-
-          <p className="mt-4 text-sm text-gray-600 dark:text-zinc-400 leading-relaxed">
-            {server.description}
-          </p>
-
-          {server.tags.length > 0 && (
-            <div className="mt-4 flex flex-wrap gap-1.5">
-              {server.tags.map((tag) => (
-                <span key={tag} className="text-xs text-gray-400 dark:text-zinc-500 bg-gray-50 dark:bg-zinc-800 px-2.5 py-1 rounded-lg">
-                  #{tag}
-                </span>
-              ))}
-            </div>
-          )}
-
-          <div className="mt-6 pt-5 border-t border-gray-100 dark:border-zinc-800 grid grid-cols-3 gap-4 text-center">
-            <div>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{server.member_count.toLocaleString()}</p>
-              <p className="text-xs text-gray-400 mt-0.5">멤버</p>
-            </div>
-            <div>
-              <p className="text-lg font-bold text-gray-900 dark:text-white">{server.bump_count.toLocaleString()}</p>
-              <p className="text-xs text-gray-400 mt-0.5">범프</p>
-            </div>
-            <div>
-              <p className="text-sm font-medium text-gray-600 dark:text-zinc-400">{bumped}</p>
-              <p className="text-xs text-gray-400 mt-0.5">마지막 범프</p>
-            </div>
+            )}
           </div>
         </div>
+
+        {/* 설명 */}
+        <p className="text-sm text-gray-600 dark:text-zinc-400 leading-relaxed">
+          {server.description}
+        </p>
+
+        {/* 태그 */}
+        {server.tags.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {server.tags.map((tag) => (
+              <span key={tag} className="text-xs text-gray-400 dark:text-zinc-500 bg-gray-50 dark:bg-zinc-800 px-2.5 py-1 rounded-lg">
+                #{tag}
+              </span>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
