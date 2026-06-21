@@ -24,7 +24,7 @@ const spaceMono = Space_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "DISPOT — 디스코드 서버 리스트",
+  title: "디스코드 서버 리스트",
   description: "한국 디스코드 서버를 찾고 등록하세요.",
 };
 
