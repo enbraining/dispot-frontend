@@ -64,6 +64,7 @@ function SubmitForm() {
           const userData = JSON.parse(decodeBase64(encodedUser));
           sessionStorage.setItem(USER_KEY, JSON.stringify(userData));
         }
+        window.dispatchEvent(new Event("dispot-login"));
         router.replace("/submit");
         return;
       } catch {}

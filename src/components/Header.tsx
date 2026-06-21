@@ -17,13 +17,18 @@ export default function Header() {
   const profileRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
-  useEffect(() => {
-    const guilds = sessionStorage.getItem(SESSION_KEY);
-    setLoggedIn(!!guilds);
+  function syncAuth() {
+    setLoggedIn(!!sessionStorage.getItem(SESSION_KEY));
     try {
       const user = JSON.parse(sessionStorage.getItem(USER_KEY) ?? "null");
-      if (user?.avatar) setAvatar(user.avatar);
+      setAvatar(user?.avatar ?? null);
     } catch {}
+  }
+
+  useEffect(() => {
+    syncAuth();
+    window.addEventListener("dispot-login", syncAuth);
+    return () => window.removeEventListener("dispot-login", syncAuth);
   }, []);
 
   useEffect(() => {
@@ -77,7 +82,7 @@ export default function Header() {
 
           <Link
             href={loggedIn ? "/submit" : "/api/auth/discord"}
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
           >
             <IconPlus size={13} stroke={2} />
             서버 등록
