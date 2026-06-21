@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, Suspense } from "react";
+import { useState, useEffect, Suspense, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { IconArrowLeft, IconBrandDiscord, IconChevronDown } from "@tabler/icons-react";
+import { IconArrowLeft, IconBrandDiscord, IconChevronDown, IconX } from "@tabler/icons-react";
 import Link from "next/link";
 import Image from "next/image";
 import { CATEGORIES, type Category } from "@/types/category";
@@ -27,10 +27,12 @@ function SubmitForm() {
     description: "",
     invite_url: "",
     category: "" as Category | "",
-    tags: "",
+    tags: [] as string[],
     member_count: "",
     nsfw: false,
   });
+  const [tagInput, setTagInput] = useState("");
+  const tagInputRef = useRef<HTMLInputElement>(null);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -58,7 +60,7 @@ function SubmitForm() {
     }));
   }
 
-  function set(key: string, val: string | boolean) {
+  function set(key: string, val: string | boolean | string[]) {
     setForm((f) => ({ ...f, [key]: val }));
   }
 
@@ -74,7 +76,7 @@ function SubmitForm() {
         body: JSON.stringify({
           ...form,
           icon_url: selectedGuild?.icon ?? null,
-          tags: form.tags.split(",").map((t) => t.trim()).filter(Boolean),
+          tags: form.tags,
           member_count: Number(form.member_count) || 0,
         }),
       });
@@ -207,8 +209,45 @@ function SubmitForm() {
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <label className={labelClass}>태그 (쉼표로 구분)</label>
-          <input value={form.tags} onChange={(e) => set("tags", e.target.value)} placeholder="롤플레이, 친목, 스터디" className={inputClass} />
+          <label className={labelClass}>태그</label>
+          <div
+            className="flex flex-wrap gap-1.5 px-3 py-2 rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 focus-within:border-indigo-400 dark:focus-within:border-indigo-500 transition-colors cursor-text min-h-[42px]"
+            onClick={() => tagInputRef.current?.focus()}
+          >
+            {form.tags.map((t) => (
+              <span key={t} className="flex items-center gap-1 px-2 py-0.5 rounded-full bg-indigo-100 dark:bg-indigo-950 text-indigo-700 dark:text-indigo-300 text-xs font-medium">
+                #{t}
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); set("tags", form.tags.filter((x) => x !== t)); }}
+                  className="hover:text-indigo-900 dark:hover:text-indigo-100"
+                >
+                  <IconX size={10} stroke={2.5} />
+                </button>
+              </span>
+            ))}
+            <input
+              ref={tagInputRef}
+              value={tagInput}
+              onChange={(e) => setTagInput(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  const val = tagInput.trim();
+                  if (val && !form.tags.includes(val) && form.tags.length < 10) {
+                    set("tags", [...form.tags, val]);
+                  }
+                  setTagInput("");
+                }
+                if (e.key === "Backspace" && !tagInput && form.tags.length > 0) {
+                  set("tags", form.tags.slice(0, -1));
+                }
+              }}
+              placeholder={form.tags.length === 0 ? "태그 입력 후 엔터" : ""}
+              className="flex-1 min-w-24 text-sm bg-transparent text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none"
+            />
+          </div>
+          <p className="text-xs text-gray-400">최대 10개 · Backspace로 마지막 태그 삭제</p>
         </div>
 
         <div className="flex flex-col gap-1.5">
