@@ -13,7 +13,7 @@ export default function ServerCard({ server }: { server: Server }) {
   return (
     <Link
       href={`/server/${server.id}`}
-      className="group flex flex-col gap-3.5 p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-md transition-all"
+      className="group flex flex-col gap-3.5 p-5 bg-white dark:bg-zinc-900 rounded-2xl border border-gray-100 dark:border-zinc-800 hover:border-gray-300 dark:hover:border-zinc-600 hover:shadow-md transition-all relative"
     >
       {/* 로고 */}
       <div className="w-14 h-14 rounded-xl bg-indigo-100 dark:bg-indigo-900 overflow-hidden flex-shrink-0 flex items-center justify-center">
@@ -47,16 +47,29 @@ export default function ServerCard({ server }: { server: Server }) {
         </div>
       )}
 
-      {/* 하단 통계 */}
+      {/* 하단 통계 + 참여하기 */}
       <div className="flex items-center justify-between text-xs text-gray-400 dark:text-zinc-500 pt-1 border-t border-gray-50 dark:border-zinc-800">
-        <span className="flex items-center gap-1">
-          <IconUsers size={12} stroke={1.5} />
-          {server.member_count.toLocaleString()}명
-        </span>
-        <span className="flex items-center gap-1">
-          <IconArrowUp size={12} stroke={1.5} />
-          {bumped}
-        </span>
+        <div className="flex items-center gap-3">
+          <span className="flex items-center gap-1">
+            <IconUsers size={12} stroke={1.5} />
+            {server.member_count.toLocaleString()}명
+          </span>
+          <span className="flex items-center gap-1">
+            <IconArrowUp size={12} stroke={1.5} />
+            {bumped}
+          </span>
+        </div>
+        {server.invite_url && (
+          <a
+            href={server.invite_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={(e) => e.stopPropagation()}
+            className="px-2.5 py-1 rounded-lg bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-medium transition-colors"
+          >
+            참여하기
+          </a>
+        )}
       </div>
     </Link>
   );
