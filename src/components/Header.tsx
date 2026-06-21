@@ -5,9 +5,16 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { IconSun, IconMoon, IconPlus } from "@tabler/icons-react";
 
+const SESSION_KEY = "dischan_guilds";
+
 export default function Header() {
   const [dark, setDark] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
   const router = useRouter();
+
+  useEffect(() => {
+    setLoggedIn(!!sessionStorage.getItem(SESSION_KEY));
+  }, []);
 
   useEffect(() => {
     const stored = localStorage.getItem("theme");
@@ -39,7 +46,7 @@ export default function Header() {
             {dark ? <IconSun size={16} stroke={1.5} /> : <IconMoon size={16} stroke={1.5} />}
           </button>
           <Link
-            href="/submit"
+            href={loggedIn ? "/submit" : "/api/auth/discord"}
             className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-900 dark:bg-white text-white dark:text-gray-900 hover:opacity-80 transition-opacity"
           >
             <IconPlus size={13} stroke={2} />
