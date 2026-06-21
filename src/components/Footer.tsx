@@ -1,6 +1,7 @@
 export default function Footer() {
   return (
-    <footer className="max-w-6xl mx-auto px-5 sm:px-8 py-6 mt-4 border-t border-gray-100 dark:border-zinc-800 flex items-center justify-between text-xs text-gray-400 dark:text-zinc-500">
+    <footer className="w-full border-t border-gray-100 dark:border-zinc-800">
+      <div className="max-w-6xl mx-auto px-5 sm:px-8 py-6 flex items-center justify-between text-xs text-gray-400 dark:text-zinc-500">
       <span>© 2025 DISPOT</span>
       <a
         href="https://discord.gg/JeXVEvbJZp"
@@ -13,6 +14,7 @@ export default function Footer() {
         </svg>
         공식 Discord 서버
       </a>
+      </div>
     </footer>
   );
 }
