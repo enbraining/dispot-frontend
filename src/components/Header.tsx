@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { IconSun, IconMoon, IconPlus, IconBrandDiscord, IconLogout } from "@tabler/icons-react";
+import { IconSun, IconMoon, IconPlus, IconBrandDiscord, IconLogout, IconLayoutDashboard } from "@tabler/icons-react";
 import Image from "next/image";
 
 const SESSION_KEY = "dispot_guilds";
@@ -104,7 +104,16 @@ export default function Header() {
               </button>
 
               {profileOpen && (
-                <div className="absolute right-0 top-full mt-1.5 w-40 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-20">
+                <div className="absolute right-0 top-full mt-1.5 w-44 bg-white dark:bg-zinc-900 border border-gray-100 dark:border-zinc-800 rounded-xl shadow-lg overflow-hidden z-20">
+                  <Link
+                    href="/dashboard"
+                    onClick={() => setProfileOpen(false)}
+                    className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-gray-700 dark:text-zinc-300 hover:bg-gray-50 dark:hover:bg-zinc-800 transition-colors"
+                  >
+                    <IconLayoutDashboard size={14} stroke={1.5} />
+                    대시보드
+                  </Link>
+                  <div className="border-t border-gray-100 dark:border-zinc-800" />
                   <button
                     onClick={logout}
                     className="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-red-500 hover:bg-red-50 dark:hover:bg-red-950/30 transition-colors"
