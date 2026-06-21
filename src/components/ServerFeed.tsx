@@ -98,8 +98,8 @@ export default function ServerFeed() {
 
   return (
     <div className="flex flex-col gap-5">
-      {/* Search + Sort */}
-      <div className="flex gap-2 flex-wrap sm:flex-nowrap">
+      {/* Search + 랜덤 */}
+      <div className="flex gap-2">
         <div className="relative flex-1 min-w-0">
           <IconSearch size={14} stroke={1.5} className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
@@ -110,15 +110,6 @@ export default function ServerFeed() {
             className="w-full pl-9 pr-4 py-2 text-sm rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:border-indigo-400 dark:focus:border-indigo-500 transition-colors"
           />
         </div>
-        <select
-          value={sort}
-          onChange={(e) => setSort(e.target.value as Sort)}
-          className="px-3 py-2 text-sm rounded-xl border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 focus:outline-none focus:border-indigo-400 transition-colors"
-        >
-          {SORT_OPTIONS.map((o) => (
-            <option key={o.value} value={o.value}>{o.label}</option>
-          ))}
-        </select>
         <button
           onClick={async () => {
             setRandomLoading(true);
@@ -156,9 +147,17 @@ export default function ServerFeed() {
         )}
       </div>
 
-      {/* mobile filter */}
+      {/* Sort + mobile filter */}
       <div className="flex items-center justify-between">
-        <div />
+        <select
+          value={sort}
+          onChange={(e) => setSort(e.target.value as Sort)}
+          className="px-3 py-1.5 text-xs rounded-lg border border-gray-200 dark:border-zinc-700 bg-white dark:bg-zinc-900 text-gray-700 dark:text-zinc-300 focus:outline-none focus:border-indigo-400 transition-colors"
+        >
+          {SORT_OPTIONS.map((o) => (
+            <option key={o.value} value={o.value}>{o.label}</option>
+          ))}
+        </select>
         <button
           onClick={() => setFilterOpen(true)}
           className={`sm:hidden flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-xs font-medium transition-colors ${
