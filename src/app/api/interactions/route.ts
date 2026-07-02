@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     const { name } = data.data;
     const guildId: string = data.guild_id;
 
-    if (name === "bump") return handleBump(guildId);
+    if (name === "pot" || name === "팟") return handleBump(guildId);
     if (name === "register") return handleRegister(guildId, data);
   }
 

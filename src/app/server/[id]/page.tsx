@@ -118,7 +118,7 @@ export default async function ServerPage({ params }: { params: Promise<{ id: str
         )}
 
         <p className="text-xs text-gray-400 dark:text-zinc-600 pt-1 border-t border-gray-50 dark:border-zinc-800">
-          범프는 Discord 서버에서 <code className="font-mono">/bump</code> 명령어로 할 수 있습니다.
+          범프는 Discord 서버에서 <code className="font-mono">/pot</code> 또는 <code className="font-mono">/팟</code> 명령어로 할 수 있습니다.
         </p>
       </div>
     </div>

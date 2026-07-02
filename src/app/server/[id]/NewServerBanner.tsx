@@ -33,8 +33,8 @@ export default function NewServerBanner({ guildId }: { guildId: string | null })
             <span className="text-indigo-500 dark:text-indigo-400">초대 링크로 사용할 채널을 등록합니다.</span>
           </div>
           <div className="flex items-start gap-2 text-xs text-indigo-700 dark:text-indigo-300">
-            <code className="font-mono bg-indigo-100 dark:bg-indigo-900 px-1.5 py-0.5 rounded shrink-0">/bump</code>
-            <span className="text-indigo-500 dark:text-indigo-400">30분마다 서버를 목록 상단으로 올립니다.</span>
+            <code className="font-mono bg-indigo-100 dark:bg-indigo-900 px-1.5 py-0.5 rounded shrink-0">/pot</code>
+            <span className="text-indigo-500 dark:text-indigo-400">30분마다 서버를 목록 상단으로 올립니다. (<code className="font-mono">/팟</code>도 동일)</span>
           </div>
         </div>
       </div>

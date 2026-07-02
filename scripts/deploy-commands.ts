@@ -10,7 +10,11 @@ const BOT_TOKEN = process.env.DISCORD_BOT_TOKEN!;
 
 const commands = [
   {
-    name: "bump",
+    name: "pot",
+    description: "이 서버를 DISPOT 상단에 올립니다.",
+  },
+  {
+    name: "팟",
     description: "이 서버를 DISPOT 상단에 올립니다.",
   },
   {
