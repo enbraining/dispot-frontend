@@ -1,0 +1,17 @@
+# Standalone always-on Discord presence worker.
+# The Next.js app itself stays on Vercel (serverless, no gateway connection);
+# this image only runs `scripts/presence-worker.ts`, which needs a
+# persistent WebSocket connection to Discord that Vercel can't hold open.
+FROM node:20-alpine
+
+WORKDIR /app
+
+RUN corepack enable
+
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+RUN pnpm install --frozen-lockfile
+
+COPY tsconfig.json ./tsconfig.json
+COPY scripts/presence-worker.ts ./scripts/presence-worker.ts
+
+CMD ["pnpm", "presence-worker"]

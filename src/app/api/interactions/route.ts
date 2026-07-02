@@ -43,6 +43,7 @@ export async function POST(req: NextRequest) {
 
     if (name === "pot" || name === "팟") return handleBump(guildId);
     if (name === "register") return handleRegister(guildId, data);
+    if (name === "help") return handleHelp();
   }
 
   return NextResponse.json({ type: 1 });
@@ -122,6 +123,18 @@ async function handleRegister(guildId: string, interaction: InteractionData) {
   await supabase.from("servers").update({ invite_url: inviteUrl }).eq("guild_id", guildId);
 
   return msg(`✅ 초대 링크가 등록되었습니다: ${inviteUrl}`);
+}
+
+async function handleHelp() {
+  return msg(
+    [
+      "**DISPOT 명령어**",
+      "`/pot` 또는 `/팟` — 이 서버를 DISPOT 상단으로 올립니다. (30분 쿨다운)",
+      "`/register #채널` — 초대 링크로 사용할 채널을 등록합니다.",
+      "`/help` — 이 명령어 목록을 보여줍니다.",
+    ].join("\n"),
+    true,
+  );
 }
 
 function msg(content: string, ephemeral = false) {

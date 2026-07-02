@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "deploy-commands": "tsx scripts/deploy-commands.ts"
+    "deploy-commands": "tsx scripts/deploy-commands.ts",
+    "presence-worker": "tsx scripts/presence-worker.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.0",

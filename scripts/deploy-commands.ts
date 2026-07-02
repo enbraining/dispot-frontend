@@ -30,6 +30,10 @@ const commands = [
       },
     ],
   },
+  {
+    name: "help",
+    description: "DISPOT 봇 명령어 목록을 보여줍니다.",
+  },
 ];
 
 async function main() {
